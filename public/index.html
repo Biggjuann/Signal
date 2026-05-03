@@ -538,6 +538,43 @@
   .row-verdict { color: var(--text-muted); line-height: 1.45; }
   .row-snippet { color: var(--text-dim); font-style: italic; line-height: 1.45; }
 
+  .results-row.expandable { cursor: pointer; transition: background 0.15s; }
+  .results-row.expandable:hover { background: rgba(255, 255, 255, 0.02); }
+  .results-row.expandable::after {
+    content: '▾';
+    color: var(--text-dim);
+    font-size: 10px;
+    margin-left: 8px;
+    transition: transform 0.15s;
+  }
+  .results-row.expandable.expanded::after {
+    content: '▴';
+  }
+
+  .row-raw {
+    grid-column: 1 / -1;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--border);
+    font-family: ui-monospace, 'JetBrains Mono', SFMono-Regular, monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .row-raw-label {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-family: 'Inter', sans-serif;
+  }
+
   .row-pending { color: var(--text-dim); }
   .row-pending .skel {
     display: inline-block;
@@ -1087,6 +1124,10 @@
     </div>
 
     <button class="form-cta" id="runBtn" onclick="runAudit()">Run Audit Now <span>→</span></button>
+    <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:12px; color: var(--text-muted); cursor:pointer;">
+      <input type="checkbox" id="freshToggle" style="accent-color: var(--red); cursor:pointer;"/>
+      Force fresh — bypass 24h cache
+    </label>
     <div class="form-foot">🔒 Takes ~60 seconds. No credit card required.</div>
   </aside>
 
@@ -1259,6 +1300,9 @@
     { id: 'perplexity', name: 'Perplexity', vendor: 'Perplexity' },
   ];
 
+  // Stash raw responses keyed by llm id so we can expand them later
+  const rawResponses = {};
+
   // Render initial result rows
   function renderRows() {
     const table = document.getElementById('resultsTable');
@@ -1270,7 +1314,7 @@
         <div>Verdict</div>
         <div>Mention Snippet</div>
       </div>` + LLMS.map(l => `
-      <div class="results-row" data-llm="${l.id}">
+      <div class="results-row" data-llm="${l.id}" id="row-${l.id}" onclick="toggleRow('${l.id}')">
         <div class="row-engine">
           <span class="engine-icon">${engineIcon(l.id)}</span>
           ${l.name}
@@ -1280,6 +1324,30 @@
         <div class="row-snippet row-pending" id="q-${l.id}"><span class="skel"></span></div>
       </div>
     `).join('');
+  }
+
+  function toggleRow(llm) {
+    const row = document.getElementById('row-' + llm);
+    if (!row || !row.classList.contains('expandable')) return;
+    const existing = document.getElementById('raw-' + llm);
+    if (existing) {
+      existing.remove();
+      row.classList.remove('expanded');
+      return;
+    }
+    const raw = rawResponses[llm];
+    const div = document.createElement('div');
+    div.id = 'raw-' + llm;
+    div.className = 'row-raw';
+    const label = document.createElement('span');
+    label.className = 'row-raw-label';
+    label.textContent = 'Raw engine response';
+    const body = document.createElement('div');
+    body.textContent = raw && raw.trim() ? raw : '(empty response)';
+    div.appendChild(label);
+    div.appendChild(body);
+    row.insertAdjacentElement('afterend', div);
+    row.classList.add('expanded');
   }
 
   function engineIcon(id) {
@@ -1316,6 +1384,7 @@
     const v = document.getElementById('v-' + llm);
     const q = document.getElementById('q-' + llm);
     const b = document.getElementById('b-' + llm);
+    const row = document.getElementById('row-' + llm);
     if (!v) return;
 
     v.classList.remove('row-pending');
@@ -1332,6 +1401,10 @@
 
     b.className = 'pill ' + (r.status || 'invisible');
     b.textContent = r.label || '—';
+
+    // Stash raw response and mark row as expandable
+    rawResponses[llm] = r.raw_response || (r.error ? '(error: ' + r.error + ')' : '');
+    if (row) row.classList.add('expandable');
   }
 
   function animateScore(target) {
@@ -1372,8 +1445,10 @@
 
     if (currentSource) { try { currentSource.close(); } catch {} currentSource = null; }
 
+    const fresh = document.getElementById('freshToggle')?.checked;
     const url = '/api/audit/stream?business_name=' + encodeURIComponent(name)
-      + '&query=' + encodeURIComponent(query);
+      + '&query=' + encodeURIComponent(query)
+      + (fresh ? '&fresh=1' : '');
     const es = new EventSource(url);
     currentSource = es;
 

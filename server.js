@@ -89,7 +89,8 @@ app.post('/api/audit', rateLimit, async (req, res) => {
   const v = validateAuditInput(req.body);
   if (v.error) return res.status(400).json({ error: v.error });
 
-  const cached = cache.get(v.businessName, v.query);
+  const fresh = req.body?.fresh === true || req.body?.fresh === '1' || req.query?.fresh === '1';
+  const cached = fresh ? null : cache.get(v.businessName, v.query);
   if (cached) return res.json({ ...cached, cached: true });
 
   try {
@@ -110,6 +111,8 @@ app.get('/api/audit/stream', rateLimit, async (req, res) => {
   });
   if (v.error) return res.status(400).json({ error: v.error });
 
+  const fresh = req.query.fresh === '1';
+
   res.set({
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache, no-transform',
@@ -126,7 +129,7 @@ app.get('/api/audit/stream', rateLimit, async (req, res) => {
   let closed = false;
   req.on('close', () => { closed = true; });
 
-  const cached = cache.get(v.businessName, v.query);
+  const cached = fresh ? null : cache.get(v.businessName, v.query);
   if (cached) {
     for (const llm of LLMS) {
       if (closed) return;
