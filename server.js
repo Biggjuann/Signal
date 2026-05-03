@@ -13,6 +13,7 @@ import {
   buildHeadline,
 } from './lib/analyzer.js';
 import * as cache from './lib/cache.js';
+import { initDb, isDbReady, insertLead } from './lib/db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT) || 3000;
@@ -157,10 +158,52 @@ app.get('/api/audit/stream', rateLimit, async (req, res) => {
   }
 });
 
+app.post('/api/leads', async (req, res) => {
+  if (!isDbReady()) {
+    return res.status(503).json({ error: 'lead_capture_disabled', message: 'Database not configured.' });
+  }
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+  const businessName = typeof req.body?.business_name === 'string' ? req.body.business_name.trim() : '';
+  const website = typeof req.body?.website === 'string' ? req.body.website.trim() : '';
+  const query = typeof req.body?.query === 'string' ? req.body.query.trim() : '';
+  const auditScore = Number.isFinite(req.body?.audit_score) ? Number(req.body.audit_score) : null;
+  const auditResults = req.body?.audit_results && typeof req.body.audit_results === 'object'
+    ? req.body.audit_results
+    : null;
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: 'invalid_email' });
+  }
+  if (!businessName || businessName.length > 200) {
+    return res.status(400).json({ error: 'invalid_business_name' });
+  }
+  if (website && website.length > 500) {
+    return res.status(400).json({ error: 'invalid_website' });
+  }
+
+  try {
+    const inserted = await insertLead({
+      email,
+      businessName,
+      website,
+      query,
+      auditScore,
+      auditResults,
+      ipAddress: req.ip || req.socket?.remoteAddress || null,
+      userAgent: req.headers['user-agent'] || null,
+    });
+    res.json({ ok: true, id: inserted.id, created_at: inserted.created_at });
+  } catch (err) {
+    console.error('Lead insert failed:', err);
+    res.status(500).json({ error: 'lead_insert_failed', message: err.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,
     cache_size: cache.size(),
+    db_ready: isDbReady(),
     keys_present: {
       anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
       openai: Boolean(process.env.OPENAI_API_KEY),
@@ -169,6 +212,8 @@ app.get('/api/health', (req, res) => {
     },
   });
 });
+
+initDb().catch((err) => console.error('DB init error:', err.message));
 
 app.listen(PORT, () => {
   console.log(`Signal audit server listening on :${PORT}`);

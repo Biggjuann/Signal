@@ -73,6 +73,7 @@
     display: flex;
     align-items: center;
     gap: 32px;
+    justify-content: space-between;
   }
 
   .logo {
@@ -950,6 +951,165 @@
     color: var(--red);
   }
 
+  /* ============ LEAD MODAL ============ */
+  .lead-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+  }
+  .lead-modal.hidden { display: none; }
+  .lead-modal.fading { opacity: 0; }
+
+  .lead-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .lead-modal-card {
+    position: relative;
+    background: linear-gradient(180deg, #15151a 0%, #101013 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 480px;
+    padding: 36px 32px 28px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(239, 68, 68, 0.08) inset;
+    animation: leadIn 0.3s ease;
+  }
+  @keyframes leadIn {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .lead-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .lead-modal-close:hover { color: var(--text); }
+
+  .lead-modal-tag {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 18px;
+    font-weight: 500;
+  }
+
+  .lead-modal-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .lead-modal-title em { color: var(--red); font-style: italic; }
+
+  .lead-modal-deck {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 22px;
+  }
+
+  .lead-form { display: flex; flex-direction: column; gap: 12px; }
+
+  .lead-input {
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 11px 14px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .lead-input::placeholder { color: var(--text-dim); }
+  .lead-input:focus {
+    outline: none;
+    border-color: var(--red);
+    background: #0e0e10;
+  }
+
+  .lead-submit {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 13px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 4px;
+  }
+  .lead-submit:hover:not(:disabled) { background: #dc2626; }
+  .lead-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .lead-error {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 16px;
+  }
+
+  .lead-foot {
+    margin-top: 14px;
+    color: var(--text-dim);
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .lead-success { text-align: center; padding: 12px 0; }
+  .lead-success-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--green);
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 auto 18px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+  }
+  .lead-success h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  .lead-success p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+  .lead-success a {
+    color: var(--red);
+    font-weight: 500;
+  }
+  .lead-success a:hover { text-decoration: underline; }
+
   /* ============ FOOTER ============ */
   footer {
     position: relative;
@@ -999,17 +1159,7 @@
       </svg>
       Signal
     </div>
-    <div class="nav-links">
-      <span class="nav-link">Product<span class="caret">▾</span></span>
-      <span class="nav-link">How It Works</span>
-      <span class="nav-link">Pricing</span>
-      <span class="nav-link">Resources<span class="caret">▾</span></span>
-      <span class="nav-link">Company<span class="caret">▾</span></span>
-    </div>
-    <div class="nav-cta-row">
-      <span class="login">Log in</span>
-      <a href="#audit" class="btn-primary">Run an Audit <span class="arrow">→</span></a>
-    </div>
+    <a href="#audit" class="btn-primary">Run an Audit <span class="arrow">→</span></a>
   </div>
 </nav>
 
@@ -1249,48 +1399,39 @@
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pricing">
-  <h2 class="section-title">Simple pricing. Real results.</h2>
-  <div class="pricing-toggle">
-    <span>Monthly</span>
-    <span class="toggle-switch" id="pricingToggle" onclick="togglePricing()"></span>
-    <span>Annual <span style="color: var(--red); margin-left: 4px;">Save 20%</span></span>
-  </div>
-  <div class="pricing-grid">
-    <div class="tier">
-      <div class="tier-name">Growth</div>
-      <div class="tier-deck">For businesses getting discovered.</div>
-      <div class="tier-price"><span data-monthly="$199" data-annual="$159">$199</span><small>/month</small></div>
-      <ul class="tier-list">
-        <li>AI Visibility Audit (4 engines)</li>
-        <li>Citation Tracking &amp; Alerts</li>
-        <li>Competitor Benchmarking</li>
-        <li>Monthly Visibility Report</li>
-        <li>Email Support</li>
-      </ul>
-      <a href="#" class="tier-cta">Get Started →</a>
-    </div>
-    <div class="tier featured">
-      <div class="tier-tag">Most Popular</div>
-      <div class="tier-name">Pro</div>
-      <div class="tier-deck">For brands serious about AI visibility.</div>
-      <div class="tier-price"><span data-monthly="$499" data-annual="$399">$499</span><small>/month</small></div>
-      <ul class="tier-list">
-        <li>Everything in Growth</li>
-        <li>60-Day Fix Plan</li>
-        <li>Priority Recommendations</li>
-        <li>Weekly Tracking Updates</li>
-        <li>Priority Support</li>
-      </ul>
-      <a href="#" class="tier-cta">Get Started →</a>
-    </div>
-  </div>
-</section>
-
 <footer>
   Signal · AI Visibility Intelligence · © 2026
 </footer>
+
+<!-- LEAD CAPTURE MODAL -->
+<div class="lead-modal hidden" id="leadModal" role="dialog" aria-modal="true">
+  <div class="lead-modal-backdrop" onclick="closeLeadModal()"></div>
+  <div class="lead-modal-card">
+    <button class="lead-modal-close" onclick="closeLeadModal()" aria-label="Close">×</button>
+
+    <div id="leadFormView">
+      <span class="lead-modal-tag">Your Full Report</span>
+      <h3 class="lead-modal-title">Get the complete <em>60-day fix plan</em></h3>
+      <p class="lead-modal-deck">We'll email a full write-up — every engine, every source gap, and the prioritized 60-day plan to earn citations on the engines you're missing on.</p>
+
+      <form class="lead-form" onsubmit="submitLead(event)">
+        <input type="email" id="leadEmail" class="lead-input" placeholder="you@business.com" required autocomplete="email"/>
+        <input type="text" id="leadBusinessName" class="lead-input" placeholder="Business name" required maxlength="200"/>
+        <input type="url" id="leadWebsite" class="lead-input" placeholder="https://yourbusiness.com" maxlength="500"/>
+        <button type="submit" class="lead-submit" id="leadSubmit">Send me the report →</button>
+        <div class="lead-error" id="leadError"></div>
+      </form>
+      <div class="lead-foot">No spam. Unsubscribe anytime.</div>
+    </div>
+
+    <div class="lead-success hidden" id="leadSuccessView">
+      <div class="lead-success-icon">✓</div>
+      <h3>Check your email</h3>
+      <p>Your full Signal report will arrive within 24 hours.</p>
+      <p>Want to walk through it live?<br/><a href="#" id="leadCalendly" target="_blank" rel="noopener">Book a 30-minute call →</a></p>
+    </div>
+  </div>
+</div>
 
 <script>
   const LLMS = [
@@ -1428,6 +1569,98 @@
 
   let currentSource = null;
 
+  // Lead modal state
+  const leadModal = {
+    shown: false,
+    armed: false,
+    timerId: null,
+    delayMs: 25_000,
+    audit: null, // { business_name, query, score, results }
+    calendlyUrl: '#', // replace with real Calendly link when ready
+  };
+
+  function showLeadModal() {
+    if (leadModal.shown) return;
+    leadModal.shown = true;
+    if (leadModal.timerId) {
+      clearTimeout(leadModal.timerId);
+      leadModal.timerId = null;
+    }
+    document.getElementById('leadModal').classList.remove('hidden');
+    document.getElementById('leadCalendly').setAttribute('href', leadModal.calendlyUrl);
+    // Pre-fill the form
+    if (leadModal.audit) {
+      const bn = document.getElementById('leadBusinessName');
+      if (bn && !bn.value) bn.value = leadModal.audit.business_name || '';
+    }
+    setTimeout(() => document.getElementById('leadEmail')?.focus(), 80);
+  }
+
+  function closeLeadModal() {
+    const m = document.getElementById('leadModal');
+    m.classList.add('fading');
+    setTimeout(() => {
+      m.classList.add('hidden');
+      m.classList.remove('fading');
+    }, 220);
+  }
+
+  function armLeadModalTriggers() {
+    if (leadModal.armed) return;
+    leadModal.armed = true;
+    leadModal.timerId = setTimeout(showLeadModal, leadModal.delayMs);
+  }
+
+  // Exit intent: mouse leaves the top of the viewport
+  document.addEventListener('mouseout', (e) => {
+    if (!leadModal.armed || leadModal.shown) return;
+    if (!e.relatedTarget && e.clientY <= 0) showLeadModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('leadModal').classList.contains('hidden')) {
+      closeLeadModal();
+    }
+  });
+
+  async function submitLead(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('leadSubmit');
+    const errorEl = document.getElementById('leadError');
+    errorEl.textContent = '';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    const email = document.getElementById('leadEmail').value.trim();
+    const businessName = document.getElementById('leadBusinessName').value.trim();
+    const website = document.getElementById('leadWebsite').value.trim();
+
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          business_name: businessName,
+          website,
+          query: leadModal.audit?.query || '',
+          audit_score: leadModal.audit?.score ?? null,
+          audit_results: leadModal.audit?.results || null,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || data.error || 'Submission failed');
+      }
+      document.getElementById('leadFormView').classList.add('hidden');
+      document.getElementById('leadSuccessView').classList.remove('hidden');
+    } catch (err) {
+      errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send me the report →';
+    }
+  }
+
   async function runAudit() {
     const name = document.getElementById('bizName').value.trim();
     const query = document.getElementById('bizQuery').value.trim();
@@ -1459,10 +1692,13 @@
       } catch {}
     });
 
+    const collectedResults = {};
+
     es.addEventListener('result', (e) => {
       try {
         const data = JSON.parse(e.data);
         setRowResult(data.llm, data);
+        collectedResults[data.llm] = data;
       } catch {}
     });
 
@@ -1475,6 +1711,15 @@
         document.getElementById('scoreRecBody').textContent = recommendationFor(data.score || 0);
         animateScore(data.score || 0);
         setStatus('done', data.cached ? 'Audit complete (cached)' : 'Audit complete');
+
+        // Stash audit context and arm lead-capture triggers
+        leadModal.audit = {
+          business_name: name,
+          query,
+          score: data.score || 0,
+          results: collectedResults,
+        };
+        armLeadModalTriggers();
       } catch {}
       es.close();
       currentSource = null;
@@ -1495,15 +1740,6 @@
       currentSource = null;
       btn.disabled = false;
       btn.innerHTML = 'Try Again <span>→</span>';
-    });
-  }
-
-  // Pricing toggle
-  function togglePricing() {
-    const sw = document.getElementById('pricingToggle');
-    const on = sw.classList.toggle('on');
-    document.querySelectorAll('.tier-price [data-monthly]').forEach(el => {
-      el.textContent = on ? el.dataset.annual : el.dataset.monthly;
     });
   }
 

@@ -28,9 +28,10 @@ Set hard spending caps in each provider's dashboard before going live.
 
 ## Endpoints
 
-- `POST /api/audit` — body `{ business_name, query, email? }`. JSON response with all four engine results, score, headline, and `cached` flag.
-- `GET /api/audit/stream?business_name=...&query=...` — Server-Sent Events. Emits `progress`, `result`, `complete` events as each engine finishes. The frontend uses this for the staggered reveal.
-- `GET /api/health` — checks which API keys are configured and current cache size.
+- `POST /api/audit` — body `{ business_name, query, email?, fresh? }`. JSON response with all four engine results, score, headline, and `cached` flag. `fresh: true` bypasses the 24h cache.
+- `GET /api/audit/stream?business_name=...&query=...&fresh=1` — Server-Sent Events. Emits `progress`, `result`, `complete` events as each engine finishes. The frontend uses this for the staggered reveal.
+- `POST /api/leads` — body `{ email, business_name, website?, query?, audit_score?, audit_results? }`. Stores the lead in Postgres along with the full audit JSON for sales context. Returns 503 if `DATABASE_URL` is not configured.
+- `GET /api/health` — checks which API keys are configured, whether the DB is connected, and current cache size.
 
 ## Throttle
 
@@ -42,7 +43,32 @@ When exceeded, returns 429 with a `Retry-After` header.
 
 ## Caching
 
-In-memory `Map` keyed by `business_name + query`, 24h TTL. Same audit within the window returns instantly, no API spend. Cache resets on server restart — that's fine for v1, move to a real store when adding lead capture.
+In-memory `Map` keyed by `business_name + query`, 24h TTL. Same audit within the window returns instantly, no API spend. Cache resets on server restart. The "Force fresh" checkbox in the UI (and `fresh=1` query param) bypasses the cache to re-query all four engines.
+
+## Lead capture
+
+The post-audit modal triggers 25s after the audit completes OR on exit-intent (mouse leaves the top of the viewport), whichever is first. Posts to `POST /api/leads` and stores the lead in Postgres along with the full audit JSON.
+
+Schema (auto-created on startup if missing):
+
+```sql
+leads (
+  id            SERIAL PRIMARY KEY,
+  email         TEXT NOT NULL,
+  business_name TEXT NOT NULL,
+  website       TEXT,
+  query         TEXT,
+  audit_score   INTEGER,
+  audit_results JSONB,    -- full per-engine results
+  ip_address    TEXT,
+  user_agent    TEXT,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+)
+```
+
+Pull leads with: `SELECT id, email, business_name, audit_score, created_at FROM leads ORDER BY created_at DESC;`
+
+Wire your Calendly link by replacing `leadModal.calendlyUrl` in `public/index.html`.
 
 ## Cost per audit
 
@@ -52,21 +78,23 @@ Roughly **$0.25–0.55** uncached. The Anthropic Haiku sentiment classification 
 
 1. Push this repo to GitHub.
 2. New project → Deploy from GitHub repo → select this repo.
-3. In Variables, set: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `PERPLEXITY_API_KEY`. (Optional: `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_MS`.)
-4. Railway auto-runs `npm start`. Generate a domain from the dashboard or attach a custom one.
+3. **Add Postgres**: in the project, click "+ New" → Database → PostgreSQL. Railway injects `DATABASE_URL` into the web service automatically. The schema is created on first boot.
+4. In the web service Variables tab, set: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `PERPLEXITY_API_KEY`. (Optional: `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_MS`.)
+5. Railway auto-runs `npm start`. Generate a domain from the dashboard or attach a custom one.
 
-The server reads `PORT` from env automatically — Railway sets this.
+The server reads `PORT` from env automatically — Railway sets this. If `DATABASE_URL` is not set, the app still runs but `/api/leads` returns 503 (lead capture disabled).
 
 ## Project layout
 
 ```
-server.js              Express app, /api/audit, SSE endpoint, rate limit
+server.js              Express app: /api/audit, SSE stream, /api/leads, rate limit
 lib/
-  llm-clients.js       Per-provider query functions, all return { raw, error }
-  analyzer.js          Detection, sentiment classification, scoring, headline
+  llm-clients.js       Per-provider query functions, all return { raw, error, sources? }
+  analyzer.js          Detection (with grounded-source check), list-position, sentiment, scoring
   cache.js             24h in-memory TTL cache
+  db.js                Postgres pool + leads schema + insert
 public/
-  index.html           Landing page + audit UI, consumes SSE
+  index.html           Landing page, audit UI (SSE), lead capture modal
 .env.example           Template for required env vars
 ```
 
