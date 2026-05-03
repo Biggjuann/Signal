@@ -1428,7 +1428,7 @@
       <div class="lead-success-icon">✓</div>
       <h3>Check your email</h3>
       <p>Your full Signal report will arrive within 24 hours.</p>
-      <p>Want to walk through it live?<br/><a href="#" id="leadCalendly" target="_blank" rel="noopener">Book a 30-minute call →</a></p>
+      <p id="leadCalendlyLine" class="hidden">Want to walk through it live?<br/><a href="#" id="leadCalendly" target="_blank" rel="noopener">Book a 30-minute call →</a></p>
     </div>
   </div>
 </div>
@@ -1574,10 +1574,15 @@
     shown: false,
     armed: false,
     timerId: null,
-    delayMs: 25_000,
+    delayMs: 10_000,
     audit: null, // { business_name, query, score, results }
-    calendlyUrl: '#', // replace with real Calendly link when ready
+    calendlyUrl: null,
   };
+
+  // Pull runtime config (Calendly URL etc.) from the server
+  fetch('/api/config').then((r) => r.json()).then((cfg) => {
+    leadModal.calendlyUrl = cfg.calendly_url || null;
+  }).catch(() => {});
 
   function showLeadModal() {
     if (leadModal.shown) return;
@@ -1587,7 +1592,14 @@
       leadModal.timerId = null;
     }
     document.getElementById('leadModal').classList.remove('hidden');
-    document.getElementById('leadCalendly').setAttribute('href', leadModal.calendlyUrl);
+    const calendlyLink = document.getElementById('leadCalendly');
+    const calendlyLine = document.getElementById('leadCalendlyLine');
+    if (leadModal.calendlyUrl) {
+      calendlyLink.setAttribute('href', leadModal.calendlyUrl);
+      calendlyLine.classList.remove('hidden');
+    } else {
+      calendlyLine.classList.add('hidden');
+    }
     // Pre-fill the form
     if (leadModal.audit) {
       const bn = document.getElementById('leadBusinessName');

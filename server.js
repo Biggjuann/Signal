@@ -199,6 +199,12 @@ app.post('/api/leads', async (req, res) => {
   }
 });
 
+app.get('/api/config', (req, res) => {
+  res.json({
+    calendly_url: process.env.CALENDLY_URL || null,
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     ok: true,

@@ -68,7 +68,7 @@ leads (
 
 Pull leads with: `SELECT id, email, business_name, audit_score, created_at FROM leads ORDER BY created_at DESC;`
 
-Wire your Calendly link by replacing `leadModal.calendlyUrl` in `public/index.html`.
+Set `CALENDLY_URL` in env (Railway Variables tab) to your Calendly / Cal.com / Savvycal link. The "Book a 30-minute call" line in the success state shows up automatically. Leave blank to hide it.
 
 ## Cost per audit
 
