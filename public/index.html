@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Signal — AI Visibility Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f4f1ea;
+    --paper-warm: #ebe6db;
+    --rule: #1a1a1a;
+    --accent: #c8412c;
+    --accent-deep: #9a2f1f;
+    --gold: #b8954a;
+    --muted: #6b6358;
+    --good: #2d5a3f;
+    --warn: #b8954a;
+    --bad: #c8412c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(200, 65, 44, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(184, 149, 74, 0.05) 0%, transparent 50%);
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    z-index: 1000;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-feature-settings: "ss01", "ss02";
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    border-bottom: 1px solid var(--ink);
+    padding: 14px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .topbar-left { display: flex; gap: 32px; align-items: center; }
+  .topbar-issue { color: var(--muted); }
+  .topbar-cta {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 2px;
+  }
+
+  /* ============ MASTHEAD ============ */
+  .masthead {
+    border-bottom: 3px double var(--ink);
+    padding: 24px 32px 12px;
+    text-align: center;
+  }
+
+  .masthead-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(72px, 12vw, 180px);
+    letter-spacing: -0.04em;
+    line-height: 0.85;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .masthead-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 64px 32px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 64px;
+    align-items: end;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .hero-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .hero-headline {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(40px, 5.5vw, 76px);
+    line-height: 0.96;
+    letter-spacing: -0.025em;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+  }
+
+  .hero-deck {
+    font-family: 'Fraunces', serif;
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 480px;
+    margin-left: auto;
+  }
+
+  .hero-deck::first-letter {
+    font-size: 56px;
+    float: left;
+    line-height: 0.85;
+    margin-right: 8px;
+    margin-top: 4px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .hero-byline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ink);
+  }
+
+  /* ============ STAT STRIP ============ */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper-warm);
+  }
+
+  .stat {
+    padding: 32px 24px;
+    border-right: 1px solid var(--ink);
+    text-align: center;
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+  }
+
+  .stat-num sup {
+    font-size: 24px;
+    vertical-align: top;
+    margin-left: 2px;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ============ SECTION HEAD ============ */
+  .section-head {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 64px 32px 0;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 48px;
+    align-items: baseline;
+    border-top: 1px solid var(--ink);
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-top: 2px solid var(--accent);
+    padding-top: 12px;
+  }
+
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  /* ============ AUDIT TOOL ============ */
+  .audit {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  .audit-card {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 48px;
+    border-radius: 2px;
+    box-shadow:
+      0 1px 0 var(--ink),
+      4px 4px 0 var(--accent),
+      8px 8px 0 var(--ink);
+  }
+
+  .audit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(244, 241, 234, 0.2);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .audit-title-block { display: flex; flex-direction: column; gap: 4px; }
+
+  .audit-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .audit-title {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .audit-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gold);
+  }
+
+  .audit-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(184, 149, 74, 0.6); }
+    50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(184, 149, 74, 0); }
+  }
+
+  /* Input row */
+  .audit-input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .audit-input {
+    background: transparent;
+    border: 1px solid rgba(244, 241, 234, 0.25);
+    color: var(--paper);
+    padding: 16px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .audit-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    background: rgba(184, 149, 74, 0.05);
+  }
+
+  .audit-input::placeholder { color: rgba(244, 241, 234, 0.35); }
+
+  .audit-run {
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    padding: 16px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    font-weight: 700;
+  }
+
+  .audit-run:hover {
+    background: var(--accent-deep);
+    transform: translate(-1px, -1px);
+    box-shadow: 2px 2px 0 var(--gold);
+  }
+
+  .audit-run:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Results matrix */
+  .matrix {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border: 1px solid rgba(244, 241, 234, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .matrix-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 140px;
+    align-items: stretch;
+    border-bottom: 1px solid rgba(244, 241, 234, 0.1);
+  }
+  .matrix-row:last-child { border-bottom: none; }
+
+  .matrix-row.header {
+    background: rgba(244, 241, 234, 0.04);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .matrix-cell {
+    padding: 18px 20px;
+    border-right: 1px solid rgba(244, 241, 234, 0.08);
+    display: flex;
+    align-items: center;
+  }
+  .matrix-cell:last-child { border-right: none; }
+
+  .llm-name {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+  }
+
+  .llm-name small {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    color: rgba(244, 241, 234, 0.4);
+  }
+
+  .verdict {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.4;
+    color: rgba(244, 241, 234, 0.85);
+  }
+
+  .verdict.pending { color: rgba(244, 241, 234, 0.3); font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
+
+  .verdict-quote {
+    display: block;
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    border-radius: 2px;
+    text-align: center;
+    font-weight: 700;
+    width: 100%;
+  }
+
+  .badge.invisible { background: var(--bad); color: var(--paper); }
+  .badge.weak { background: var(--warn); color: var(--ink); }
+  .badge.present { background: var(--good); color: var(--paper); }
+  .badge.pending {
+    background: transparent;
+    color: rgba(244, 241, 234, 0.3);
+    border: 1px dashed rgba(244, 241, 234, 0.2);
+  }
+
+  /* Score */
+  .score-block {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: center;
+    padding: 32px;
+    background: rgba(184, 149, 74, 0.06);
+    border: 1px solid rgba(184, 149, 74, 0.2);
+    margin-top: 24px;
+    border-radius: 2px;
+  }
+
+  .score-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 88px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    font-variation-settings: "opsz" 144;
+  }
+
+  .score-num small {
+    font-size: 28px;
+    color: rgba(244, 241, 234, 0.4);
+  }
+
+  .score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .score-headline {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .score-headline em { color: var(--accent); font-style: italic; }
+
+  /* Hidden state */
+  .hidden { display: none; }
+
+  /* ============ THE WORK ============ */
+  .work-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .work-item {
+    padding: 40px 32px;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper);
+    transition: background 0.3s;
+  }
+  .work-item:last-child { border-right: none; }
+  .work-item:hover { background: var(--paper-warm); }
+
+  .work-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .work-title {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    margin-bottom: 12px;
+  }
+
+  .work-body {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  /* ============ CASE STUDY PULLOUT ============ */
+  .pullout {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 32px;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 64px;
+    align-items: center;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper-warm);
+  }
+
+  .pullout-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-top: 2px solid var(--accent);
+    padding-top: 12px;
+    display: inline-block;
+    margin-bottom: 24px;
+  }
+
+  .pullout-quote {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    font-style: italic;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .pullout-quote::before {
+    content: '"';
+    font-size: 1.5em;
+    line-height: 0;
+    vertical-align: -0.15em;
+    color: var(--accent);
+    margin-right: 4px;
+  }
+
+  .pullout-quote::after {
+    content: '"';
+    font-size: 1.5em;
+    line-height: 0;
+    vertical-align: -0.4em;
+    color: var(--accent);
+  }
+
+  .pullout-attr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ink);
+    display: inline-block;
+  }
+
+  /* ============ PRICING ============ */
+  .pricing {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 80px 32px;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .tier {
+    border: 1px solid var(--ink);
+    padding: 40px 32px;
+    background: var(--paper);
+    position: relative;
+    transition: transform 0.2s;
+  }
+
+  .tier:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+
+  .tier-featured {
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: 4px 4px 0 var(--accent);
+  }
+  .tier-featured:hover { box-shadow: 4px 4px 0 var(--accent), 8px 8px 0 var(--ink); }
+
+  .tier-tag {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--accent);
+    color: var(--paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    font-weight: 700;
+  }
+
+  .tier-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .tier-featured .tier-name { color: var(--gold); }
+
+  .tier-price {
+    font-family: 'Fraunces', serif;
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 4px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .tier-price small {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .tier-featured .tier-price small { color: rgba(244, 241, 234, 0.5); }
+
+  .tier-desc {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    line-height: 1.45;
+    margin: 20px 0 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid currentColor;
+    opacity: 0.85;
+  }
+
+  .tier-list {
+    list-style: none;
+    margin-bottom: 32px;
+  }
+
+  .tier-list li {
+    padding: 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    gap: 12px;
+  }
+
+  .tier-list li::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .tier-featured .tier-list li::before { color: var(--gold); }
+
+  .tier-cta {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+
+  .tier-featured .tier-cta {
+    background: var(--accent);
+  }
+  .tier-featured .tier-cta:hover { background: var(--gold); color: var(--ink); }
+
+  .tier-cta:hover {
+    background: var(--accent);
+    transform: translate(-1px, -1px);
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    border-top: 3px double var(--ink);
+    padding: 32px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .hero, .pullout { grid-template-columns: 1fr; gap: 32px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--ink); }
+    .work-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .work-item { border-right: none; }
+    .section-head { grid-template-columns: 1fr; gap: 16px; }
+    .audit-card { padding: 28px 20px; }
+    .audit-input-row { grid-template-columns: 1fr; }
+    .matrix-row { grid-template-columns: 1fr; }
+    .matrix-cell { border-right: none; border-bottom: 1px solid rgba(244, 241, 234, 0.08); }
+    .matrix-cell:last-child { border-bottom: none; }
+    .matrix-row.header { display: none; }
+    .score-block { grid-template-columns: 1fr; text-align: center; }
+    .topbar-left { gap: 16px; }
+    .topbar { padding: 12px 20px; font-size: 10px; }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* Loading dots */
+  .dots::after {
+    content: '';
+    animation: dots 1.4s infinite;
+  }
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span><strong style="letter-spacing:0.3em;">SIGNAL</strong></span>
+    <span class="topbar-issue">VOL. I &middot; No. 03</span>
+    <span class="topbar-issue" style="opacity:0.5;">AI VISIBILITY INTELLIGENCE</span>
+  </div>
+  <a href="#audit" class="topbar-cta">Run an Audit &rarr;</a>
+</div>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <h1 class="masthead-title">Signal</h1>
+  <div class="masthead-sub">The AI Visibility Brief &middot; Established 2026</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-meta">Cover Story &middot; Issue 03</div>
+    <h2 class="hero-headline">
+      Your business is invisible to the engines<br/>
+      <em>replacing Google.</em>
+    </h2>
+    <div class="hero-byline">A Diligence Memo for Operators &middot; Filed November 2026</div>
+  </div>
+  <div class="hero-deck">
+    Forty percent of search-intent traffic now flows through ChatGPT, Claude, Perplexity, and Gemini. The companies that win the next decade will not be the ones ranking on page one of Google. They will be the ones cited by name when a model answers a question. Most are not even in the index.
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stat">
+    <div class="stat-num">73<sup>%</sup></div>
+    <div class="stat-label">of consumers use AI for product research</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">4<sup>&times;</sup></div>
+    <div class="stat-label">Higher conversion from AI referrals</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Tools your competitors are using</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">48<sup>h</sup></div>
+    <div class="stat-label">Turnaround on a Signal audit</div>
+  </div>
+</section>
+
+<!-- AUDIT TOOL SECTION -->
+<div class="section-head">
+  <div class="section-num">&sect; 01 &middot; The Audit</div>
+  <h2 class="section-title">See exactly <em>where you're missing.</em></h2>
+</div>
+
+<section class="audit" id="audit">
+  <div class="audit-card">
+    <div class="audit-header">
+      <div class="audit-title-block">
+        <div class="audit-eyebrow">Live Visibility Diagnostic</div>
+        <div class="audit-title">Cross-Engine Citation Audit</div>
+      </div>
+      <div class="audit-status" id="status">Standing by</div>
+    </div>
+
+    <div class="audit-input-row">
+      <input type="text" class="audit-input" id="bizName" placeholder="Business name (e.g. The Grind Burger Bar)" value="The Grind Burger Bar"/>
+      <input type="text" class="audit-input" id="bizQuery" placeholder="Query to test (e.g. best burgers near Lewisville)" value="best burgers near Lewisville TX"/>
+      <button class="audit-run" id="runBtn" onclick="runAudit()">Run Audit</button>
+    </div>
+
+    <div class="matrix" id="matrix">
+      <div class="matrix-row header">
+        <div class="matrix-cell">Engine</div>
+        <div class="matrix-cell">Verdict</div>
+        <div class="matrix-cell">Status</div>
+      </div>
+      <div class="matrix-row" data-llm="claude">
+        <div class="matrix-cell">
+          <div class="llm-name">Claude<small>Anthropic</small></div>
+        </div>
+        <div class="matrix-cell">
+          <div class="verdict pending" id="v-claude">Awaiting analysis</div>
+        </div>
+        <div class="matrix-cell">
+          <span class="badge pending" id="b-claude">&mdash; &mdash; &mdash;</span>
+        </div>
+      </div>
+      <div class="matrix-row" data-llm="chatgpt">
+        <div class="matrix-cell">
+          <div class="llm-name">ChatGPT<small>OpenAI</small></div>
+        </div>
+        <div class="matrix-cell">
+          <div class="verdict pending" id="v-chatgpt">Awaiting analysis</div>
+        </div>
+        <div class="matrix-cell">
+          <span class="badge pending" id="b-chatgpt">&mdash; &mdash; &mdash;</span>
+        </div>
+      </div>
+      <div class="matrix-row" data-llm="gemini">
+        <div class="matrix-cell">
+          <div class="llm-name">Gemini<small>Google</small></div>
+        </div>
+        <div class="matrix-cell">
+          <div class="verdict pending" id="v-gemini">Awaiting analysis</div>
+        </div>
+        <div class="matrix-cell">
+          <span class="badge pending" id="b-gemini">&mdash; &mdash; &mdash;</span>
+        </div>
+      </div>
+      <div class="matrix-row" data-llm="perplexity">
+        <div class="matrix-cell">
+          <div class="llm-name">Perplexity<small>Citations engine</small></div>
+        </div>
+        <div class="matrix-cell">
+          <div class="verdict pending" id="v-perplexity">Awaiting analysis</div>
+        </div>
+        <div class="matrix-cell">
+          <span class="badge pending" id="b-perplexity">&mdash; &mdash; &mdash;</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-block hidden" id="scoreBlock">
+      <div class="score-num" id="scoreNum">&mdash;<small>/100</small></div>
+      <div>
+        <div class="score-label">Visibility Score &middot; Composite</div>
+        <div class="score-headline" id="scoreHeadline">&mdash;</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE WORK SECTION -->
+<div class="section-head">
+  <div class="section-num">&sect; 02 &middot; The Work</div>
+  <h2 class="section-title">A diligence-grade approach <em>to a new channel.</em></h2>
+</div>
+
+<section class="work-grid">
+  <div class="work-item">
+    <div class="work-num">01 / Diagnostic</div>
+    <h3 class="work-title">Multi-engine citation map</h3>
+    <p class="work-body">We test your brand across the four dominant LLMs against twenty buyer-intent queries. We document where you're invisible, where you're cited, and crucially &mdash; how you're characterized when you do appear.</p>
+  </div>
+  <div class="work-item">
+    <div class="work-num">02 / Forensic</div>
+    <h3 class="work-title">Source-mix attribution</h3>
+    <p class="work-body">Every LLM weights sources differently. ChatGPT leans heavy on Reddit and Bing. Claude defers to Google Places. We trace the sources driving your competitor's mentions and identify the specific assets you're missing.</p>
+  </div>
+  <div class="work-item">
+    <div class="work-num">03 / Prescriptive</div>
+    <h3 class="work-title">Sixty-day fix calendar</h3>
+    <p class="work-body">A prioritized work order: schema deployments, listicle outreach targets, Reddit seeding strategy, review-language coaching, llms.txt deployment, and the one signature item your business should be known for.</p>
+  </div>
+</section>
+
+<!-- PULLOUT QUOTE -->
+<section class="pullout">
+  <div>
+    <div class="pullout-eyebrow">Field Notes &middot; Case File 003</div>
+    <div class="pullout-attr">A burger restaurant<br/>in Lewisville, Texas</div>
+  </div>
+  <div>
+    <div class="pullout-quote">Listed on ChatGPT as 'solid, not elite.' Invisible on Claude. Sixty days later, top-three on every engine.</div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<div class="section-head">
+  <div class="section-num">&sect; 03 &middot; Engagement</div>
+  <h2 class="section-title">Two ways <em>to start.</em></h2>
+</div>
+
+<section class="pricing">
+  <div class="pricing-grid">
+    <div class="tier">
+      <div class="tier-name">The Diagnostic</div>
+      <div class="tier-price">$1,500<small> &middot; one-time</small></div>
+      <div class="tier-desc">A complete picture of your AI visibility, delivered in 48 hours. The pain, quantified.</div>
+      <ul class="tier-list">
+        <li>Full multi-engine audit across 4 LLMs</li>
+        <li>20 buyer-intent query tests</li>
+        <li>Competitor citation deltas</li>
+        <li>Technical scan: schema, llms.txt, crawler access</li>
+        <li>Prioritized 60-day fix calendar</li>
+        <li>One 60-minute walkthrough call</li>
+      </ul>
+      <a href="#" class="tier-cta">Book the Diagnostic</a>
+    </div>
+    <div class="tier tier-featured">
+      <div class="tier-tag">Most Common</div>
+      <div class="tier-name">The Engagement</div>
+      <div class="tier-price">$3,500<small> &middot; per month</small></div>
+      <div class="tier-desc">We build the visibility for you. Citation share tracking, content seeding, and monthly position reports.</div>
+      <ul class="tier-list">
+        <li>Everything in The Diagnostic</li>
+        <li>Monthly citation-share tracking dashboard</li>
+        <li>Listicle and press placement outreach</li>
+        <li>Reddit and forum seeding execution</li>
+        <li>Schema and technical implementation</li>
+        <li>Quarterly competitive intelligence reports</li>
+      </ul>
+      <a href="#" class="tier-cta">Start the Engagement</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Signal &middot; AI Visibility Intelligence &middot; The brief for operators &nbsp;&middot;&nbsp; &copy; 2026
+</footer>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.work-item, .stat, .tier').forEach(el => {
+    el.classList.add('reveal');
+    io.observe(el);
+  });
+
+  // Audit simulation — uses pre-canned realistic results based on The Grind data
+  const auditData = {
+    "the grind burger bar": {
+      claude:     { verdict: "Not surfaced in top 5 results. Defaulted to higher-rated competitors.",                      quote: "(KRUSH and LSA Burger ranked instead)",     status: "invisible", label: "Invisible" },
+      chatgpt:    { verdict: "Listed, but characterized as 'solid, not elite.'",                                          quote: "— a backhanded compliment that costs customers", status: "weak",      label: "Weak signal" },
+      gemini:     { verdict: "Mentioned only when query specified the immediate area. No descriptive language.",          quote: "(neutral, undifferentiated mention)",       status: "weak",      label: "Weak signal" },
+      perplexity: { verdict: "Cited via two low-authority directory pages. No editorial context.",                        quote: "— citations exist, but carry no weight",     status: "weak",      label: "Weak signal" },
+      score: 28,
+      headline: 'Visibility is <em>fractured.</em> The brand surfaces inconsistently and is mischaracterized when it does.'
+    },
+    "default": {
+      claude:     { verdict: "No surfaced citations across the tested query set.",                                        quote: "(competitors ranked in your place)",         status: "invisible", label: "Invisible" },
+      chatgpt:    { verdict: "Limited mentions; thin descriptive context.",                                               quote: "— no signature association",                 status: "weak",      label: "Weak signal" },
+      gemini:     { verdict: "Surface-level mentions only. No editorial weight.",                                         quote: "(neutral, undifferentiated)",                status: "weak",      label: "Weak signal" },
+      perplexity: { verdict: "Citations exist but originate from low-authority directory sources.",                       quote: "— weak source mix",                          status: "weak",      label: "Weak signal" },
+      score: 31,
+      headline: 'A <em>significant gap</em> between your web footprint and how AI engines describe you.'
+    }
+  };
+
+  const llms = ['claude', 'chatgpt', 'gemini', 'perplexity'];
+
+  function resetMatrix() {
+    llms.forEach(llm => {
+      document.getElementById('v-' + llm).className = 'verdict pending';
+      document.getElementById('v-' + llm).textContent = 'Awaiting analysis';
+      document.getElementById('b-' + llm).className = 'badge pending';
+      document.getElementById('b-' + llm).textContent = '— — —';
+    });
+    document.getElementById('scoreBlock').classList.add('hidden');
+  }
+
+  async function runAudit() {
+    const name = document.getElementById('bizName').value.trim();
+    const query = document.getElementById('bizQuery').value.trim();
+    if (!name || !query) return;
+
+    const btn = document.getElementById('runBtn');
+    const status = document.getElementById('status');
+    btn.disabled = true;
+    btn.textContent = 'Running…';
+    status.innerHTML = '<span class="dots">Auditing</span>';
+
+    resetMatrix();
+
+    const key = name.toLowerCase();
+    const data = auditData[key] || auditData.default;
+
+    // Animate each LLM result with a delay
+    for (let i = 0; i < llms.length; i++) {
+      await new Promise(r => setTimeout(r, 700));
+      const llm = llms[i];
+      const result = data[llm];
+      const verdictEl = document.getElementById('v-' + llm);
+      const badgeEl = document.getElementById('b-' + llm);
+
+      verdictEl.className = 'verdict';
+      verdictEl.innerHTML = result.verdict + '<span class="verdict-quote">' + result.quote + '</span>';
+      badgeEl.className = 'badge ' + result.status;
+      badgeEl.textContent = result.label;
+    }
+
+    // Show score
+    await new Promise(r => setTimeout(r, 600));
+    const scoreBlock = document.getElementById('scoreBlock');
+    const scoreNum = document.getElementById('scoreNum');
+    const scoreHeadline = document.getElementById('scoreHeadline');
+    scoreBlock.classList.remove('hidden');
+    scoreHeadline.innerHTML = data.headline;
+
+    // Animate the score number
+    let s = 0;
+    const target = data.score;
+    const tick = setInterval(() => {
+      s += 2;
+      if (s >= target) { s = target; clearInterval(tick); }
+      scoreNum.innerHTML = s + '<small>/100</small>';
+    }, 28);
+
+    btn.disabled = false;
+    btn.textContent = 'Run Again';
+    status.innerHTML = 'Audit complete';
+  }
+</script>
+
+</body>
+</html>
