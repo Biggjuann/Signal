@@ -67,7 +67,7 @@ async function runAuditFor(businessName, query, { onProgress, onResult } = {}) {
 
       let sentiment = null;
       if (partial._needsSentiment) {
-        sentiment = await classifySentiment(partial.quote);
+        sentiment = await classifySentiment(partial.quote, businessName, query);
       }
       const final = finalizeEngineResult(partial, sentiment);
       partials[llm] = final;
