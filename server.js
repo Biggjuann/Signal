@@ -61,8 +61,8 @@ async function runAuditFor(businessName, query, { onProgress, onResult } = {}) {
   await Promise.all(
     LLMS.map(async (llm) => {
       onProgress?.(llm, 'running');
-      const { raw, error } = await clients[llm](businessName, query);
-      const partial = buildEngineResult({ llm, raw, error, businessName });
+      const { raw, error, sources } = await clients[llm](businessName, query);
+      const partial = buildEngineResult({ llm, raw, error, businessName, sources });
       partials[llm] = partial;
 
       let sentiment = null;
