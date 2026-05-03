@@ -4,1065 +4,1356 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Signal — AI Visibility Intelligence</title>
+<meta name="description" content="See exactly where your business is invisible to ChatGPT, Claude, Gemini, and Perplexity. Cross-engine citation audit and 60-day fix plan."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0a0a0a;
-    --paper: #f4f1ea;
-    --paper-warm: #ebe6db;
-    --rule: #1a1a1a;
-    --accent: #c8412c;
-    --accent-deep: #9a2f1f;
-    --gold: #b8954a;
-    --muted: #6b6358;
-    --good: #2d5a3f;
-    --warn: #b8954a;
-    --bad: #c8412c;
+    --bg: #0a0a0a;
+    --bg-card: #111114;
+    --bg-card-2: #161619;
+    --border: #232328;
+    --border-strong: #2e2e34;
+    --text: #f4f4f5;
+    --text-muted: #a1a1a8;
+    --text-dim: #6c6c74;
+    --red: #ef4444;
+    --red-dim: #b91c1c;
+    --red-glow: rgba(239, 68, 68, 0.15);
+    --amber: #f59e0b;
+    --green: #22c55e;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
 
   body {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 17px;
-    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
     overflow-x: hidden;
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(200, 65, 44, 0.04) 0%, transparent 40%),
-      radial-gradient(circle at 80% 60%, rgba(184, 149, 74, 0.05) 0%, transparent 50%);
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Grain overlay */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.4;
-    z-index: 1000;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 90% 30%, rgba(239, 68, 68, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 400px at 10% 80%, rgba(239, 68, 68, 0.05) 0%, transparent 60%);
   }
 
-  .mono {
-    font-family: 'JetBrains Mono', monospace;
-    font-feature-settings: "ss01", "ss02";
-  }
+  .serif { font-family: 'Instrument Serif', 'Times New Roman', serif; font-weight: 400; }
+  .red { color: var(--red); }
 
-  /* ============ TOP BAR ============ */
-  .topbar {
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ============ NAV ============ */
+  .nav {
     position: sticky;
     top: 0;
-    background: var(--paper);
-    border-bottom: 1px solid var(--ink);
+    z-index: 50;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner {
+    max-width: 1240px;
+    margin: 0 auto;
     padding: 14px 32px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    z-index: 100;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    gap: 32px;
   }
 
-  .topbar-left { display: flex; gap: 32px; align-items: center; }
-  .topbar-issue { color: var(--muted); }
-  .topbar-cta {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px solid var(--accent);
-    padding-bottom: 2px;
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: -0.01em;
   }
 
-  /* ============ MASTHEAD ============ */
-  .masthead {
-    border-bottom: 3px double var(--ink);
-    padding: 24px 32px 12px;
-    text-align: center;
+  .logo svg { width: 22px; height: 22px; }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    margin-left: 24px;
+    flex: 1;
   }
 
-  .masthead-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 900;
-    font-size: clamp(72px, 12vw, 180px);
-    letter-spacing: -0.04em;
-    line-height: 0.85;
-    font-variation-settings: "opsz" 144;
+  .nav-link {
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: color 0.15s;
+    cursor: pointer;
+  }
+  .nav-link:hover { color: var(--text); }
+
+  .nav-link .caret {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 10px;
+    opacity: 0.7;
   }
 
-  .masthead-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 8px;
+  .nav-cta-row { display: flex; align-items: center; gap: 16px; }
+
+  .login {
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
   }
+  .login:hover { color: var(--text); }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red);
+    color: #fff;
+    border: 1px solid var(--red);
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-primary:hover { background: #dc2626; }
+  .btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn-primary .arrow { display: inline-block; transition: transform 0.15s; }
+  .btn-primary:hover:not(:disabled) .arrow { transform: translateX(2px); }
 
   /* ============ HERO ============ */
   .hero {
-    padding: 64px 32px 80px;
-    max-width: 1400px;
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
     margin: 0 auto;
+    padding: 80px 32px 64px;
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
+    grid-template-columns: 1fr 1fr;
     gap: 64px;
-    align-items: end;
-    border-bottom: 1px solid var(--ink);
-  }
-
-  .hero-meta {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--ink);
+    align-items: start;
   }
 
   .hero-headline {
-    font-family: 'Fraunces', serif;
+    font-family: 'Instrument Serif', serif;
     font-weight: 400;
-    font-size: clamp(40px, 5.5vw, 76px);
-    line-height: 0.96;
-    letter-spacing: -0.025em;
-    font-variation-settings: "opsz" 144;
+    font-size: clamp(44px, 5.6vw, 72px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
   }
 
   .hero-headline em {
     font-style: italic;
-    font-weight: 300;
-    color: var(--accent);
+    color: var(--red);
   }
 
   .hero-deck {
-    font-family: 'Fraunces', serif;
-    font-size: 21px;
-    line-height: 1.5;
-    color: var(--ink);
-    max-width: 480px;
-    margin-left: auto;
+    color: var(--text-muted);
+    font-size: 17px;
+    line-height: 1.55;
+    max-width: 520px;
+    margin-bottom: 32px;
   }
 
-  .hero-deck::first-letter {
-    font-size: 56px;
-    float: left;
-    line-height: 0.85;
-    margin-right: 8px;
-    margin-top: 4px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .hero-byline {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
+  .hero-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
     margin-top: 32px;
-    padding-top: 16px;
-    border-top: 1px solid var(--ink);
   }
 
-  /* ============ STAT STRIP ============ */
+  .hero-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .hero-pill .icon {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
+  .hero-pill .icon svg { width: 14px; height: 14px; stroke: var(--red); }
+
+  /* Hero card */
+  .hero-card {
+    background: linear-gradient(180deg, #15151a 0%, #101013 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(239, 68, 68, 0.04) inset;
+  }
+
+  .hero-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .hero-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .hero-card-window {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hero-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gauge {
+    position: relative;
+    width: 140px;
+    height: 80px;
+  }
+  .gauge svg { width: 100%; height: 100%; overflow: visible; }
+  .gauge-bg { stroke: #2a2a2f; }
+  .gauge-fg { stroke: var(--red); transition: stroke-dashoffset 1.2s ease; }
+  .gauge-num {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    line-height: 1;
+  }
+  .gauge-denom {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    margin-top: 2px;
+  }
+  .gauge-state {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 4px;
+    text-align: center;
+  }
+  .gauge-delta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .citation-list { display: flex; flex-direction: column; gap: 10px; }
+  .citation-row {
+    display: grid;
+    grid-template-columns: 22px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .citation-row .name { color: var(--text); }
+  .citation-row .pct { color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+
+  .engine-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: grid;
+    place-items: center;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--red);
+    flex-shrink: 0;
+  }
+  .engine-icon svg { width: 12px; height: 12px; }
+
+  .pill {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: capitalize;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .pill.partial, .pill.weak { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+  .pill.present { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+  .pill.low, .pill.invisible { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+  .pill.error { background: rgba(108, 108, 116, 0.15); color: var(--text-muted); }
+  .pill.pending {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px dashed var(--border-strong);
+  }
+
+  /* ============ STATS ============ */
   .stats {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 40px 32px 0;
+  }
+
+  .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    border-bottom: 1px solid var(--ink);
-    background: var(--paper-warm);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
   }
 
   .stat {
-    padding: 32px 24px;
-    border-right: 1px solid var(--ink);
-    text-align: center;
+    padding: 28px 24px;
+    border-right: 1px solid var(--border);
   }
   .stat:last-child { border-right: none; }
 
   .stat-num {
-    font-family: 'Fraunces', serif;
-    font-weight: 900;
-    font-size: 56px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px;
     line-height: 1;
-    letter-spacing: -0.04em;
-    color: var(--accent);
-  }
-
-  .stat-num sup {
-    font-size: 24px;
-    vertical-align: top;
-    margin-left: 2px;
-  }
-
-  .stat-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-
-  /* ============ SECTION HEAD ============ */
-  .section-head {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 64px 32px 0;
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 48px;
-    align-items: baseline;
-    border-top: 1px solid var(--ink);
-  }
-
-  .section-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border-top: 2px solid var(--accent);
-    padding-top: 12px;
-  }
-
-  .section-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 400;
-    font-size: clamp(32px, 4vw, 52px);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    font-variation-settings: "opsz" 144;
-  }
-
-  .section-title em {
-    font-style: italic;
-    color: var(--accent);
-  }
-
-  /* ============ AUDIT TOOL ============ */
-  .audit {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 48px 32px 80px;
-  }
-
-  .audit-card {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 48px;
-    border-radius: 2px;
-    box-shadow:
-      0 1px 0 var(--ink),
-      4px 4px 0 var(--accent),
-      8px 8px 0 var(--ink);
-  }
-
-  .audit-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(244, 241, 234, 0.2);
-    padding-bottom: 24px;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-
-  .audit-title-block { display: flex; flex-direction: column; gap: 4px; }
-
-  .audit-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold);
-  }
-
-  .audit-title {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-
-  .audit-status {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--gold);
-  }
-
-  .audit-status::before {
-    content: '';
-    width: 8px;
-    height: 8px;
-    background: var(--gold);
-    border-radius: 50%;
-    animation: pulse 1.6s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(184, 149, 74, 0.6); }
-    50% { opacity: 0.6; box-shadow: 0 0 0 8px rgba(184, 149, 74, 0); }
-  }
-
-  /* Input row */
-  .audit-input-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-
-  .audit-input {
-    background: transparent;
-    border: 1px solid rgba(244, 241, 234, 0.25);
-    color: var(--paper);
-    padding: 16px 18px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 0.02em;
-    border-radius: 2px;
-    transition: all 0.2s;
-  }
-
-  .audit-input:focus {
-    outline: none;
-    border-color: var(--gold);
-    background: rgba(184, 149, 74, 0.05);
-  }
-
-  .audit-input::placeholder { color: rgba(244, 241, 234, 0.35); }
-
-  .audit-run {
-    background: var(--accent);
-    color: var(--paper);
-    border: none;
-    padding: 16px 28px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.2s;
-    font-weight: 700;
-  }
-
-  .audit-run:hover {
-    background: var(--accent-deep);
-    transform: translate(-1px, -1px);
-    box-shadow: 2px 2px 0 var(--gold);
-  }
-
-  .audit-run:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  /* Results matrix */
-  .matrix {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0;
-    border: 1px solid rgba(244, 241, 234, 0.15);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .matrix-row {
-    display: grid;
-    grid-template-columns: 180px 1fr 140px;
-    align-items: stretch;
-    border-bottom: 1px solid rgba(244, 241, 234, 0.1);
-  }
-  .matrix-row:last-child { border-bottom: none; }
-
-  .matrix-row.header {
-    background: rgba(244, 241, 234, 0.04);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--gold);
-  }
-
-  .matrix-cell {
-    padding: 18px 20px;
-    border-right: 1px solid rgba(244, 241, 234, 0.08);
-    display: flex;
-    align-items: center;
-  }
-  .matrix-cell:last-child { border-right: none; }
-
-  .llm-name {
-    font-family: 'Fraunces', serif;
-    font-size: 19px;
-    font-weight: 500;
-  }
-
-  .llm-name small {
-    display: block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-top: 2px;
-    color: rgba(244, 241, 234, 0.4);
-  }
-
-  .verdict {
-    font-family: 'Fraunces', serif;
-    font-size: 15px;
-    font-style: italic;
-    line-height: 1.4;
-    color: rgba(244, 241, 234, 0.85);
-  }
-
-  .verdict.pending { color: rgba(244, 241, 234, 0.3); font-style: normal; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
-
-  .verdict-quote {
-    display: block;
-    font-size: 13px;
-    color: var(--gold);
-    margin-top: 6px;
-    font-style: italic;
-  }
-
-  .badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    padding: 6px 10px;
-    border-radius: 2px;
-    text-align: center;
-    font-weight: 700;
-    width: 100%;
-  }
-
-  .badge.invisible { background: var(--bad); color: var(--paper); }
-  .badge.weak { background: var(--warn); color: var(--ink); }
-  .badge.present { background: var(--good); color: var(--paper); }
-  .badge.pending {
-    background: transparent;
-    color: rgba(244, 241, 234, 0.3);
-    border: 1px dashed rgba(244, 241, 234, 0.2);
-  }
-
-  /* Score */
-  .score-block {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 32px;
-    align-items: center;
-    padding: 32px;
-    background: rgba(184, 149, 74, 0.06);
-    border: 1px solid rgba(184, 149, 74, 0.2);
-    margin-top: 24px;
-    border-radius: 2px;
-  }
-
-  .score-num {
-    font-family: 'Fraunces', serif;
-    font-weight: 900;
-    font-size: 88px;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: var(--accent);
-    font-variation-settings: "opsz" 144;
-  }
-
-  .score-num small {
-    font-size: 28px;
-    color: rgba(244, 241, 234, 0.4);
-  }
-
-  .score-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--gold);
+    color: var(--red);
     margin-bottom: 8px;
   }
-
-  .score-headline {
-    font-family: 'Fraunces', serif;
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+  .stat-label {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.4;
   }
 
-  .score-headline em { color: var(--accent); font-style: italic; }
-
-  /* Hidden state */
-  .hidden { display: none; }
-
-  /* ============ THE WORK ============ */
-  .work-grid {
-    max-width: 1400px;
+  /* ============ AUDIT SECTION ============ */
+  .audit-section {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 48px 32px 80px;
+    padding: 40px 32px 80px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    border-top: 1px solid var(--ink);
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    align-items: start;
   }
 
-  .work-item {
-    padding: 40px 32px;
-    border-right: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
-    background: var(--paper);
-    transition: background 0.3s;
-  }
-  .work-item:last-child { border-right: none; }
-  .work-item:hover { background: var(--paper-warm); }
-
-  .work-num {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--accent);
-    margin-bottom: 16px;
+  .form-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
   }
 
-  .work-title {
-    font-family: 'Fraunces', serif;
-    font-size: 26px;
-    font-weight: 500;
-    line-height: 1.1;
-    letter-spacing: -0.015em;
-    margin-bottom: 12px;
+  .form-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
   }
 
-  .work-body {
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--muted);
-  }
-
-  /* ============ CASE STUDY PULLOUT ============ */
-  .pullout {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 80px 32px;
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 64px;
-    align-items: center;
-    border-top: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
-    background: var(--paper-warm);
-  }
-
-  .pullout-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border-top: 2px solid var(--accent);
-    padding-top: 12px;
-    display: inline-block;
+  .form-deck {
+    font-size: 13px;
+    color: var(--text-muted);
     margin-bottom: 24px;
   }
 
-  .pullout-quote {
-    font-family: 'Fraunces', serif;
-    font-size: clamp(28px, 3.5vw, 48px);
-    line-height: 1.1;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    font-style: italic;
-    font-variation-settings: "opsz" 144;
+  .form-field { margin-bottom: 18px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 500;
   }
 
-  .pullout-quote::before {
-    content: '"';
-    font-size: 1.5em;
-    line-height: 0;
-    vertical-align: -0.15em;
-    color: var(--accent);
-    margin-right: 4px;
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 11px 14px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .form-input::placeholder { color: var(--text-dim); }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--red);
+    background: #0e0e10;
   }
 
-  .pullout-quote::after {
-    content: '"';
-    font-size: 1.5em;
-    line-height: 0;
-    vertical-align: -0.4em;
-    color: var(--accent);
+  .form-cta {
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    padding: 13px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .form-cta:hover:not(:disabled) { background: #dc2626; }
+  .form-cta:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .form-foot {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
   }
 
-  .pullout-attr {
-    font-family: 'JetBrains Mono', monospace;
+  /* Results card */
+  .results-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .results-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .results-title {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .results-title .target { color: var(--text-muted); font-weight: 400; }
+
+  .results-status {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+  .status-dot.live { background: var(--red); animation: pulse 1.4s ease-in-out infinite; }
+  .status-dot.done { background: var(--green); }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  }
+
+  .results-table { width: 100%; }
+
+  .results-row {
+    display: grid;
+    grid-template-columns: 160px 120px 1.5fr 1.5fr;
+    gap: 16px;
+    padding: 16px 24px;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .results-row:last-child { border-bottom: none; }
+
+  .results-row.head {
+    background: rgba(255, 255, 255, 0.015);
     font-size: 11px;
-    letter-spacing: 0.2em;
+    color: var(--text-dim);
     text-transform: uppercase;
-    color: var(--muted);
-    margin-top: 20px;
-    padding-top: 12px;
-    border-top: 1px solid var(--ink);
+    letter-spacing: 0.06em;
+    font-weight: 500;
+  }
+
+  .row-engine {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .row-verdict { color: var(--text-muted); line-height: 1.45; }
+  .row-snippet { color: var(--text-dim); font-style: italic; line-height: 1.45; }
+
+  .row-pending { color: var(--text-dim); }
+  .row-pending .skel {
     display: inline-block;
+    height: 10px;
+    width: 70%;
+    background: linear-gradient(90deg, #1a1a1f 0%, #25252b 50%, #1a1a1f 100%);
+    background-size: 200% 100%;
+    border-radius: 3px;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Score panel */
+  .score-card {
+    margin-top: 24px;
+    background: linear-gradient(180deg, #15151a 0%, #101013 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 36px;
+    align-items: center;
+    transition: opacity 0.4s ease;
+  }
+  .score-card.hidden { display: none; }
+
+  .score-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 80px;
+    line-height: 1;
+    color: var(--red);
+  }
+  .score-num small {
+    color: var(--text-dim);
+    font-size: 24px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .score-mid .score-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .score-mid .score-headline {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    line-height: 1.25;
+  }
+  .score-mid .score-headline em { color: var(--red); font-style: italic; }
+
+  .score-rec {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    max-width: 280px;
+  }
+  .score-rec-tag {
+    font-size: 10px;
+    background: var(--red);
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .score-rec-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .score-rec-body {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  /* ============ HOW IT WORKS ============ */
+  .how {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 32px 32px 80px;
+  }
+
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .how-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .how-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+
+  .how-card-num {
+    font-size: 13px;
+    color: var(--red);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .how-card h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .how-card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+  .how-card-link {
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .how-card-link:hover { text-decoration: underline; }
+  .how-card-viz {
+    height: 80px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 16px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .how-card-viz svg { width: 100%; height: 100%; }
+
+  /* ============ SUCCESS STORY ============ */
+  .success {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  .success-card {
+    background: linear-gradient(135deg, #1a1115 0%, #0e0e10 100%);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 220px 1fr auto;
+    gap: 28px;
+    padding: 24px;
+    align-items: center;
+  }
+
+  .success-img {
+    width: 220px;
+    height: 160px;
+    border-radius: 10px;
+    background:
+      linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(0, 0, 0, 0.5)),
+      radial-gradient(circle at 30% 40%, #6b3a1f 0%, #2a1a10 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  .success-img::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 35% 45%, rgba(245, 158, 11, 0.4) 0%, transparent 35%),
+      radial-gradient(circle at 60% 60%, rgba(239, 68, 68, 0.3) 0%, transparent 40%);
+  }
+
+  .success-tag {
+    font-size: 10px;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .success-quote {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  .success-attr {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .success-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    padding-left: 28px;
+    border-left: 1px solid var(--border-strong);
+  }
+
+  .success-stat-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    color: var(--red);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .success-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
   }
 
   /* ============ PRICING ============ */
   .pricing {
-    max-width: 1400px;
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 80px 32px;
+    padding: 0 32px 100px;
   }
+
+  .pricing-toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: var(--border-strong);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.2s;
+  }
+  .toggle-switch.on { background: var(--red); }
+  .toggle-switch.on::after { left: 18px; }
 
   .pricing-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-    margin-top: 48px;
+    gap: 20px;
+    max-width: 760px;
+    margin: 0 auto;
   }
 
   .tier {
-    border: 1px solid var(--ink);
-    padding: 40px 32px;
-    background: var(--paper);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
     position: relative;
-    transition: transform 0.2s;
   }
 
-  .tier:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
-
-  .tier-featured {
-    background: var(--ink);
-    color: var(--paper);
-    box-shadow: 4px 4px 0 var(--accent);
+  .tier.featured {
+    border-color: var(--red);
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.04) 0%, var(--bg-card) 60%);
   }
-  .tier-featured:hover { box-shadow: 4px 4px 0 var(--accent), 8px 8px 0 var(--ink); }
 
   .tier-tag {
     position: absolute;
-    top: -10px;
-    right: 20px;
-    background: var(--accent);
-    color: var(--paper);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.25em;
+    top: -12px;
+    right: 24px;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
     padding: 4px 10px;
-    font-weight: 700;
+    border-radius: 4px;
+    font-weight: 600;
   }
 
   .tier-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    margin-bottom: 6px;
   }
-
-  .tier-featured .tier-name { color: var(--gold); }
+  .tier-deck {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
 
   .tier-price {
-    font-family: 'Fraunces', serif;
-    font-size: 64px;
-    font-weight: 900;
+    font-family: 'Instrument Serif', serif;
+    font-size: 56px;
     line-height: 1;
-    letter-spacing: -0.04em;
-    margin-bottom: 4px;
-    font-variation-settings: "opsz" 144;
+    margin-bottom: 24px;
   }
-
   .tier-price small {
-    font-size: 16px;
-    font-weight: 400;
-    color: var(--muted);
-  }
-
-  .tier-featured .tier-price small { color: rgba(244, 241, 234, 0.5); }
-
-  .tier-desc {
-    font-family: 'Fraunces', serif;
-    font-size: 18px;
-    line-height: 1.45;
-    margin: 20px 0 28px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid currentColor;
-    opacity: 0.85;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-left: 4px;
   }
 
   .tier-list {
     list-style: none;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
   }
-
   .tier-list li {
-    padding: 8px 0;
-    font-size: 14px;
-    line-height: 1.5;
+    padding: 7px 0;
+    font-size: 13px;
+    color: var(--text-muted);
     display: flex;
-    gap: 12px;
+    gap: 10px;
+    align-items: flex-start;
   }
-
   .tier-list li::before {
-    content: '→';
-    color: var(--accent);
+    content: '✓';
+    color: var(--red);
+    font-weight: 700;
     flex-shrink: 0;
-    font-family: 'JetBrains Mono', monospace;
   }
-
-  .tier-featured .tier-list li::before { color: var(--gold); }
 
   .tier-cta {
     display: inline-block;
-    background: var(--ink);
-    color: var(--paper);
-    padding: 14px 28px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    text-decoration: none;
-    font-weight: 700;
-    transition: all 0.2s;
+    width: 100%;
+    text-align: center;
+    background: var(--red);
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s;
   }
-
-  .tier-featured .tier-cta {
-    background: var(--accent);
+  .tier-cta:hover { background: #dc2626; }
+  .tier:not(.featured) .tier-cta {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text);
   }
-  .tier-featured .tier-cta:hover { background: var(--gold); color: var(--ink); }
-
-  .tier-cta:hover {
-    background: var(--accent);
-    transform: translate(-1px, -1px);
+  .tier:not(.featured) .tier-cta:hover {
+    border-color: var(--red);
+    color: var(--red);
   }
 
   /* ============ FOOTER ============ */
   footer {
-    border-top: 3px double var(--ink);
-    padding: 32px;
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 28px 32px;
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: var(--muted);
+    color: var(--text-dim);
+    font-size: 12px;
   }
 
   /* ============ RESPONSIVE ============ */
-  @media (max-width: 900px) {
-    .hero, .pullout { grid-template-columns: 1fr; gap: 32px; }
-    .stats { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 980px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; padding: 56px 24px 48px; }
+    .audit-section { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .stat:nth-child(2) { border-right: none; }
-    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--ink); }
-    .work-grid, .pricing-grid { grid-template-columns: 1fr; }
-    .work-item { border-right: none; }
-    .section-head { grid-template-columns: 1fr; gap: 16px; }
-    .audit-card { padding: 28px 20px; }
-    .audit-input-row { grid-template-columns: 1fr; }
-    .matrix-row { grid-template-columns: 1fr; }
-    .matrix-cell { border-right: none; border-bottom: 1px solid rgba(244, 241, 234, 0.08); }
-    .matrix-cell:last-child { border-bottom: none; }
-    .matrix-row.header { display: none; }
-    .score-block { grid-template-columns: 1fr; text-align: center; }
-    .topbar-left { gap: 16px; }
-    .topbar { padding: 12px 20px; font-size: 10px; }
-  }
-
-  /* Scroll reveal */
-  .reveal {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-
-  /* Loading dots */
-  .dots::after {
-    content: '';
-    animation: dots 1.4s infinite;
-  }
-  @keyframes dots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+    .how-grid { grid-template-columns: 1fr; }
+    .results-row { grid-template-columns: 1fr; gap: 6px; padding: 14px 20px; }
+    .results-row.head { display: none; }
+    .score-card { grid-template-columns: 1fr; gap: 20px; text-align: left; }
+    .success-card { grid-template-columns: 1fr; }
+    .success-img { width: 100%; }
+    .success-stats { padding-left: 0; border-left: none; padding-top: 20px; border-top: 1px solid var(--border-strong); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .nav-inner { padding: 12px 20px; }
+    .stats { padding: 20px 24px 0; }
+    .audit-section { padding: 24px 24px 60px; }
+    .how, .success, .pricing { padding-left: 24px; padding-right: 24px; }
   }
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-left">
-    <span><strong style="letter-spacing:0.3em;">SIGNAL</strong></span>
-    <span class="topbar-issue">VOL. I &middot; No. 03</span>
-    <span class="topbar-issue" style="opacity:0.5;">AI VISIBILITY INTELLIGENCE</span>
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="12" x2="3" y2="12" stroke="#ef4444"/>
+        <line x1="7" y1="8" x2="7" y2="16" stroke="#ef4444"/>
+        <line x1="11" y1="4" x2="11" y2="20" stroke="#ef4444"/>
+        <line x1="15" y1="9" x2="15" y2="15" stroke="#ef4444"/>
+        <line x1="19" y1="11" x2="19" y2="13" stroke="#ef4444"/>
+      </svg>
+      Signal
+    </div>
+    <div class="nav-links">
+      <span class="nav-link">Product<span class="caret">▾</span></span>
+      <span class="nav-link">How It Works</span>
+      <span class="nav-link">Pricing</span>
+      <span class="nav-link">Resources<span class="caret">▾</span></span>
+      <span class="nav-link">Company<span class="caret">▾</span></span>
+    </div>
+    <div class="nav-cta-row">
+      <span class="login">Log in</span>
+      <a href="#audit" class="btn-primary">Run an Audit <span class="arrow">→</span></a>
+    </div>
   </div>
-  <a href="#audit" class="topbar-cta">Run an Audit &rarr;</a>
-</div>
-
-<!-- MASTHEAD -->
-<header class="masthead">
-  <h1 class="masthead-title">Signal</h1>
-  <div class="masthead-sub">The AI Visibility Brief &middot; Established 2026</div>
-</header>
+</nav>
 
 <!-- HERO -->
 <section class="hero">
   <div>
-    <div class="hero-meta">Cover Story &middot; Issue 03</div>
-    <h2 class="hero-headline">
-      Your business is invisible to the engines<br/>
-      <em>replacing Google.</em>
-    </h2>
-    <div class="hero-byline">A Diligence Memo for Operators &middot; Filed November 2026</div>
+    <h1 class="hero-headline">Your business is <em>invisible</em> to the engines replacing Google.</h1>
+    <p class="hero-deck">Buyers now discover brands through ChatGPT, Claude, Gemini, and Perplexity. Signal tracks, audits, and improves your AI citations so you get chosen.</p>
+    <div class="hero-pills">
+      <div class="hero-pill">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/></svg></span>
+        Track citations<br/>across 4 engines
+      </div>
+      <div class="hero-pill">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2l9 4-9 4-9-4 9-4z"/><path d="M3 10l9 4 9-4"/><path d="M3 16l9 4 9-4"/></svg></span>
+        Benchmark against<br/>competitors
+      </div>
+      <div class="hero-pill">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></span>
+        Improve visibility<br/>with a proven plan
+      </div>
+    </div>
   </div>
-  <div class="hero-deck">
-    Forty percent of search-intent traffic now flows through ChatGPT, Claude, Perplexity, and Gemini. The companies that win the next decade will not be the ones ranking on page one of Google. They will be the ones cited by name when a model answers a question. Most are not even in the index.
+
+  <div class="hero-card">
+    <div class="hero-card-head">
+      <span class="hero-card-title">AI Visibility Overview</span>
+      <span class="hero-card-window">Live Demo ▾</span>
+    </div>
+    <div class="hero-card-grid">
+      <div class="panel gauge-wrap">
+        <div class="panel-label">Overall Score</div>
+        <div class="gauge">
+          <svg viewBox="0 0 140 80" preserveAspectRatio="xMidYMid meet">
+            <path class="gauge-bg" d="M 14 70 A 56 56 0 0 1 126 70" fill="none" stroke-width="10" stroke-linecap="round"/>
+            <path id="demo-gauge-fg" class="gauge-fg" d="M 14 70 A 56 56 0 0 1 126 70" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="65"/>
+          </svg>
+          <div class="gauge-num" id="demo-gauge-num">62<div class="gauge-denom">/100</div></div>
+        </div>
+        <div class="gauge-state">Needs improvement</div>
+        <div class="gauge-delta">↑ 14 pts vs previous 7 days</div>
+      </div>
+      <div class="panel">
+        <div class="panel-label">Citation Presence</div>
+        <div class="citation-list">
+          <div class="citation-row">
+            <span class="engine-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg></span>
+            <span class="name">Claude</span>
+            <span class="pill partial">Partial</span>
+            <span class="pct">54%</span>
+          </div>
+          <div class="citation-row">
+            <span class="engine-icon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="20" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/></svg></span>
+            <span class="name">ChatGPT</span>
+            <span class="pill present">Present</span>
+            <span class="pct">71%</span>
+          </div>
+          <div class="citation-row">
+            <span class="engine-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L20 12 L12 22 L4 12 Z"/></svg></span>
+            <span class="name">Gemini</span>
+            <span class="pill partial">Partial</span>
+            <span class="pct">49%</span>
+          </div>
+          <div class="citation-row">
+            <span class="engine-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5"/></svg></span>
+            <span class="name">Perplexity</span>
+            <span class="pill low">Low</span>
+            <span class="pct">32%</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- STATS -->
 <section class="stats">
-  <div class="stat">
-    <div class="stat-num">73<sup>%</sup></div>
-    <div class="stat-label">of consumers use AI for product research</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">4<sup>&times;</sup></div>
-    <div class="stat-label">Higher conversion from AI referrals</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">0</div>
-    <div class="stat-label">Tools your competitors are using</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">48<sup>h</sup></div>
-    <div class="stat-label">Turnaround on a Signal audit</div>
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-num">73%</div>
+      <div class="stat-label">of buyers use AI for brand discovery</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">4×</div>
+      <div class="stat-label">more traffic from AI sources for top-cited brands</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">mentions means you don't exist to AI</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">48h</div>
+      <div class="stat-label">to get your custom audit and action plan</div>
+    </div>
   </div>
 </section>
 
-<!-- AUDIT TOOL SECTION -->
-<div class="section-head">
-  <div class="section-num">&sect; 01 &middot; The Audit</div>
-  <h2 class="section-title">See exactly <em>where you're missing.</em></h2>
-</div>
+<!-- AUDIT FORM + RESULTS -->
+<section class="audit-section" id="audit">
+  <aside class="form-card">
+    <div class="form-title">Run Your AI Visibility Audit</div>
+    <div class="form-deck">Tell us your business name and a buyer-intent query. We test all four engines live.</div>
 
-<section class="audit" id="audit">
-  <div class="audit-card">
-    <div class="audit-header">
-      <div class="audit-title-block">
-        <div class="audit-eyebrow">Live Visibility Diagnostic</div>
-        <div class="audit-title">Cross-Engine Citation Audit</div>
-      </div>
-      <div class="audit-status" id="status">Standing by</div>
+    <div class="form-field">
+      <label class="form-label" for="bizName">Business / Brand Name</label>
+      <input class="form-input" id="bizName" type="text" placeholder="The Grind Burger Bar" value="The Grind Burger Bar"/>
     </div>
 
-    <div class="audit-input-row">
-      <input type="text" class="audit-input" id="bizName" placeholder="Business name (e.g. The Grind Burger Bar)" value="The Grind Burger Bar"/>
-      <input type="text" class="audit-input" id="bizQuery" placeholder="Query to test (e.g. best burgers near Lewisville)" value="best burgers near Lewisville TX"/>
-      <button class="audit-run" id="runBtn" onclick="runAudit()">Run Audit</button>
+    <div class="form-field">
+      <label class="form-label" for="bizQuery">Buyer-intent Query</label>
+      <input class="form-input" id="bizQuery" type="text" placeholder="best burgers near Lewisville TX" value="best burgers near Lewisville TX"/>
     </div>
 
-    <div class="matrix" id="matrix">
-      <div class="matrix-row header">
-        <div class="matrix-cell">Engine</div>
-        <div class="matrix-cell">Verdict</div>
-        <div class="matrix-cell">Status</div>
+    <button class="form-cta" id="runBtn" onclick="runAudit()">Run Audit Now <span>→</span></button>
+    <div class="form-foot">🔒 Takes ~60 seconds. No credit card required.</div>
+  </aside>
+
+  <div>
+    <div class="results-card">
+      <div class="results-head">
+        <div class="results-title">Audit Results <span class="target" id="targetLabel">— ready</span></div>
+        <div class="results-status" id="statusEl"><span class="status-dot" id="statusDot"></span><span id="statusText">Standing by</span></div>
       </div>
-      <div class="matrix-row" data-llm="claude">
-        <div class="matrix-cell">
-          <div class="llm-name">Claude<small>Anthropic</small></div>
+      <div class="results-table" id="resultsTable">
+        <div class="results-row head">
+          <div>Engine</div>
+          <div>Status</div>
+          <div>Verdict</div>
+          <div>Mention Snippet</div>
         </div>
-        <div class="matrix-cell">
-          <div class="verdict pending" id="v-claude">Awaiting analysis</div>
-        </div>
-        <div class="matrix-cell">
-          <span class="badge pending" id="b-claude">&mdash; &mdash; &mdash;</span>
-        </div>
-      </div>
-      <div class="matrix-row" data-llm="chatgpt">
-        <div class="matrix-cell">
-          <div class="llm-name">ChatGPT<small>OpenAI</small></div>
-        </div>
-        <div class="matrix-cell">
-          <div class="verdict pending" id="v-chatgpt">Awaiting analysis</div>
-        </div>
-        <div class="matrix-cell">
-          <span class="badge pending" id="b-chatgpt">&mdash; &mdash; &mdash;</span>
-        </div>
-      </div>
-      <div class="matrix-row" data-llm="gemini">
-        <div class="matrix-cell">
-          <div class="llm-name">Gemini<small>Google</small></div>
-        </div>
-        <div class="matrix-cell">
-          <div class="verdict pending" id="v-gemini">Awaiting analysis</div>
-        </div>
-        <div class="matrix-cell">
-          <span class="badge pending" id="b-gemini">&mdash; &mdash; &mdash;</span>
-        </div>
-      </div>
-      <div class="matrix-row" data-llm="perplexity">
-        <div class="matrix-cell">
-          <div class="llm-name">Perplexity<small>Citations engine</small></div>
-        </div>
-        <div class="matrix-cell">
-          <div class="verdict pending" id="v-perplexity">Awaiting analysis</div>
-        </div>
-        <div class="matrix-cell">
-          <span class="badge pending" id="b-perplexity">&mdash; &mdash; &mdash;</span>
-        </div>
+        <!-- rows injected by JS -->
       </div>
     </div>
 
-    <div class="score-block hidden" id="scoreBlock">
-      <div class="score-num" id="scoreNum">&mdash;<small>/100</small></div>
+    <div class="score-card hidden" id="scoreCard">
+      <div class="score-num" id="scoreNum">—<small>/100</small></div>
+      <div class="score-mid">
+        <div class="score-label">Visibility Score · Composite</div>
+        <div class="score-headline" id="scoreHeadline">—</div>
+      </div>
+      <div class="score-rec">
+        <div class="score-rec-tag">High Impact</div>
+        <div class="score-rec-title">Top recommendation</div>
+        <div class="score-rec-body" id="scoreRecBody">Earn citations on high-authority publications your competitors already appear in.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <h2 class="section-title">How Signal Works</h2>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-card-num">01</div>
+      <h3>Citation Map</h3>
+      <p>We map where (and where not) your brand appears across the top AI engines, against buyer-intent queries.</p>
+      <a class="how-card-link" href="#audit">Explore your map →</a>
+      <div class="how-card-viz">
+        <svg viewBox="0 0 200 80">
+          <circle cx="100" cy="40" r="30" fill="none" stroke="#232328" stroke-width="1"/>
+          <circle cx="100" cy="40" r="20" fill="none" stroke="#232328" stroke-width="1"/>
+          <circle cx="100" cy="40" r="10" fill="none" stroke="#232328" stroke-width="1"/>
+          <circle cx="100" cy="40" r="2" fill="#ef4444"/>
+          <circle cx="120" cy="30" r="2" fill="#ef4444"/>
+          <circle cx="80" cy="50" r="2" fill="#ef4444"/>
+          <circle cx="130" cy="55" r="2" fill="#ef4444" opacity="0.6"/>
+          <circle cx="75" cy="25" r="2" fill="#ef4444" opacity="0.6"/>
+          <circle cx="115" cy="60" r="2" fill="#ef4444" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="how-card">
+      <div class="how-card-num">02</div>
+      <h3>Source Attribution</h3>
+      <p>We analyze which sources each AI trusts and how your brand compares to competitors on those sources.</p>
+      <a class="how-card-link" href="#audit">See source breakdown →</a>
+      <div class="how-card-viz">
+        <svg viewBox="0 0 200 80">
+          <rect x="30" y="22" width="140" height="6" rx="3" fill="#232328"/>
+          <rect x="30" y="22" width="98" height="6" rx="3" fill="#ef4444"/>
+          <rect x="30" y="38" width="140" height="6" rx="3" fill="#232328"/>
+          <rect x="30" y="38" width="62" height="6" rx="3" fill="#ef4444"/>
+          <rect x="30" y="54" width="140" height="6" rx="3" fill="#232328"/>
+          <rect x="30" y="54" width="118" height="6" rx="3" fill="#ef4444"/>
+        </svg>
+      </div>
+    </div>
+    <div class="how-card">
+      <div class="how-card-num">03</div>
+      <h3>60-Day Fix Plan</h3>
+      <p>You get a prioritized roadmap to earn citations and become the AI's top answer in your category.</p>
+      <a class="how-card-link" href="#audit">View sample plan →</a>
+      <div class="how-card-viz">
+        <svg viewBox="0 0 200 80">
+          <circle cx="30" cy="22" r="5" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+          <path d="M27 22 L29 24 L33 20" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+          <rect x="44" y="19" width="120" height="6" rx="3" fill="#232328"/>
+          <circle cx="30" cy="40" r="5" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+          <path d="M27 40 L29 42 L33 38" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+          <rect x="44" y="37" width="100" height="6" rx="3" fill="#232328"/>
+          <circle cx="30" cy="58" r="5" fill="none" stroke="#6c6c74" stroke-width="1.5"/>
+          <rect x="44" y="55" width="80" height="6" rx="3" fill="#1a1a1f"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUCCESS STORY -->
+<section class="success">
+  <div class="success-card">
+    <div class="success-img" aria-hidden="true"></div>
+    <div>
+      <div class="success-tag">Success Story</div>
+      <div class="success-quote">"Signal helped us go from invisible to the top answer across every AI engine."</div>
+      <div class="success-attr">— Placeholder case study</div>
+    </div>
+    <div class="success-stats">
       <div>
-        <div class="score-label">Visibility Score &middot; Composite</div>
-        <div class="score-headline" id="scoreHeadline">&mdash;</div>
+        <div class="success-stat-num">+312%</div>
+        <div class="success-stat-label">increase in AI-driven website visits</div>
+      </div>
+      <div>
+        <div class="success-stat-num">#1</div>
+        <div class="success-stat-label">ranking in ChatGPT local results</div>
+      </div>
+      <div>
+        <div class="success-stat-num">2.8×</div>
+        <div class="success-stat-label">more calls &amp; direction requests</div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- THE WORK SECTION -->
-<div class="section-head">
-  <div class="section-num">&sect; 02 &middot; The Work</div>
-  <h2 class="section-title">A diligence-grade approach <em>to a new channel.</em></h2>
-</div>
-
-<section class="work-grid">
-  <div class="work-item">
-    <div class="work-num">01 / Diagnostic</div>
-    <h3 class="work-title">Multi-engine citation map</h3>
-    <p class="work-body">We test your brand across the four dominant LLMs against twenty buyer-intent queries. We document where you're invisible, where you're cited, and crucially &mdash; how you're characterized when you do appear.</p>
-  </div>
-  <div class="work-item">
-    <div class="work-num">02 / Forensic</div>
-    <h3 class="work-title">Source-mix attribution</h3>
-    <p class="work-body">Every LLM weights sources differently. ChatGPT leans heavy on Reddit and Bing. Claude defers to Google Places. We trace the sources driving your competitor's mentions and identify the specific assets you're missing.</p>
-  </div>
-  <div class="work-item">
-    <div class="work-num">03 / Prescriptive</div>
-    <h3 class="work-title">Sixty-day fix calendar</h3>
-    <p class="work-body">A prioritized work order: schema deployments, listicle outreach targets, Reddit seeding strategy, review-language coaching, llms.txt deployment, and the one signature item your business should be known for.</p>
-  </div>
-</section>
-
-<!-- PULLOUT QUOTE -->
-<section class="pullout">
-  <div>
-    <div class="pullout-eyebrow">Field Notes &middot; Case File 003</div>
-    <div class="pullout-attr">A burger restaurant<br/>in Lewisville, Texas</div>
-  </div>
-  <div>
-    <div class="pullout-quote">Listed on ChatGPT as 'solid, not elite.' Invisible on Claude. Sixty days later, top-three on every engine.</div>
   </div>
 </section>
 
 <!-- PRICING -->
-<div class="section-head">
-  <div class="section-num">&sect; 03 &middot; Engagement</div>
-  <h2 class="section-title">Two ways <em>to start.</em></h2>
-</div>
-
 <section class="pricing">
+  <h2 class="section-title">Simple pricing. Real results.</h2>
+  <div class="pricing-toggle">
+    <span>Monthly</span>
+    <span class="toggle-switch" id="pricingToggle" onclick="togglePricing()"></span>
+    <span>Annual <span style="color: var(--red); margin-left: 4px;">Save 20%</span></span>
+  </div>
   <div class="pricing-grid">
     <div class="tier">
-      <div class="tier-name">The Diagnostic</div>
-      <div class="tier-price">$1,500<small> &middot; one-time</small></div>
-      <div class="tier-desc">A complete picture of your AI visibility, delivered in 48 hours. The pain, quantified.</div>
+      <div class="tier-name">Growth</div>
+      <div class="tier-deck">For businesses getting discovered.</div>
+      <div class="tier-price"><span data-monthly="$199" data-annual="$159">$199</span><small>/month</small></div>
       <ul class="tier-list">
-        <li>Full multi-engine audit across 4 LLMs</li>
-        <li>20 buyer-intent query tests</li>
-        <li>Competitor citation deltas</li>
-        <li>Technical scan: schema, llms.txt, crawler access</li>
-        <li>Prioritized 60-day fix calendar</li>
-        <li>One 60-minute walkthrough call</li>
+        <li>AI Visibility Audit (4 engines)</li>
+        <li>Citation Tracking &amp; Alerts</li>
+        <li>Competitor Benchmarking</li>
+        <li>Monthly Visibility Report</li>
+        <li>Email Support</li>
       </ul>
-      <a href="#" class="tier-cta">Book the Diagnostic</a>
+      <a href="#" class="tier-cta">Get Started →</a>
     </div>
-    <div class="tier tier-featured">
-      <div class="tier-tag">Most Common</div>
-      <div class="tier-name">The Engagement</div>
-      <div class="tier-price">$3,500<small> &middot; per month</small></div>
-      <div class="tier-desc">We build the visibility for you. Citation share tracking, content seeding, and monthly position reports.</div>
+    <div class="tier featured">
+      <div class="tier-tag">Most Popular</div>
+      <div class="tier-name">Pro</div>
+      <div class="tier-deck">For brands serious about AI visibility.</div>
+      <div class="tier-price"><span data-monthly="$499" data-annual="$399">$499</span><small>/month</small></div>
       <ul class="tier-list">
-        <li>Everything in The Diagnostic</li>
-        <li>Monthly citation-share tracking dashboard</li>
-        <li>Listicle and press placement outreach</li>
-        <li>Reddit and forum seeding execution</li>
-        <li>Schema and technical implementation</li>
-        <li>Quarterly competitive intelligence reports</li>
+        <li>Everything in Growth</li>
+        <li>60-Day Fix Plan</li>
+        <li>Priority Recommendations</li>
+        <li>Weekly Tracking Updates</li>
+        <li>Priority Support</li>
       </ul>
-      <a href="#" class="tier-cta">Start the Engagement</a>
+      <a href="#" class="tier-cta">Get Started →</a>
     </div>
   </div>
 </section>
 
 <footer>
-  Signal &middot; AI Visibility Intelligence &middot; The brief for operators &nbsp;&middot;&nbsp; &copy; 2026
+  Signal · AI Visibility Intelligence · © 2026
 </footer>
 
 <script>
-  // Scroll reveal
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.15 });
-  document.querySelectorAll('.work-item, .stat, .tier').forEach(el => {
-    el.classList.add('reveal');
-    io.observe(el);
-  });
+  const LLMS = [
+    { id: 'claude',     name: 'Claude',     vendor: 'Anthropic' },
+    { id: 'chatgpt',    name: 'ChatGPT',    vendor: 'OpenAI' },
+    { id: 'gemini',     name: 'Gemini',     vendor: 'Google' },
+    { id: 'perplexity', name: 'Perplexity', vendor: 'Perplexity' },
+  ];
 
-  // Audit simulation — uses pre-canned realistic results based on The Grind data
-  const auditData = {
-    "the grind burger bar": {
-      claude:     { verdict: "Not surfaced in top 5 results. Defaulted to higher-rated competitors.",                      quote: "(KRUSH and LSA Burger ranked instead)",     status: "invisible", label: "Invisible" },
-      chatgpt:    { verdict: "Listed, but characterized as 'solid, not elite.'",                                          quote: "— a backhanded compliment that costs customers", status: "weak",      label: "Weak signal" },
-      gemini:     { verdict: "Mentioned only when query specified the immediate area. No descriptive language.",          quote: "(neutral, undifferentiated mention)",       status: "weak",      label: "Weak signal" },
-      perplexity: { verdict: "Cited via two low-authority directory pages. No editorial context.",                        quote: "— citations exist, but carry no weight",     status: "weak",      label: "Weak signal" },
-      score: 28,
-      headline: 'Visibility is <em>fractured.</em> The brand surfaces inconsistently and is mischaracterized when it does.'
-    },
-    "default": {
-      claude:     { verdict: "No surfaced citations across the tested query set.",                                        quote: "(competitors ranked in your place)",         status: "invisible", label: "Invisible" },
-      chatgpt:    { verdict: "Limited mentions; thin descriptive context.",                                               quote: "— no signature association",                 status: "weak",      label: "Weak signal" },
-      gemini:     { verdict: "Surface-level mentions only. No editorial weight.",                                         quote: "(neutral, undifferentiated)",                status: "weak",      label: "Weak signal" },
-      perplexity: { verdict: "Citations exist but originate from low-authority directory sources.",                       quote: "— weak source mix",                          status: "weak",      label: "Weak signal" },
-      score: 31,
-      headline: 'A <em>significant gap</em> between your web footprint and how AI engines describe you.'
-    }
-  };
-
-  const llms = ['claude', 'chatgpt', 'gemini', 'perplexity'];
-
-  function resetMatrix() {
-    llms.forEach(llm => {
-      document.getElementById('v-' + llm).className = 'verdict pending';
-      document.getElementById('v-' + llm).textContent = 'Awaiting analysis';
-      document.getElementById('b-' + llm).className = 'badge pending';
-      document.getElementById('b-' + llm).textContent = '— — —';
-    });
-    document.getElementById('scoreBlock').classList.add('hidden');
+  // Render initial result rows
+  function renderRows() {
+    const table = document.getElementById('resultsTable');
+    // Keep header (first child)
+    table.innerHTML = `
+      <div class="results-row head">
+        <div>Engine</div>
+        <div>Status</div>
+        <div>Verdict</div>
+        <div>Mention Snippet</div>
+      </div>` + LLMS.map(l => `
+      <div class="results-row" data-llm="${l.id}">
+        <div class="row-engine">
+          <span class="engine-icon">${engineIcon(l.id)}</span>
+          ${l.name}
+        </div>
+        <div><span class="pill pending" id="b-${l.id}">— — —</span></div>
+        <div class="row-verdict row-pending" id="v-${l.id}">Awaiting analysis…</div>
+        <div class="row-snippet row-pending" id="q-${l.id}"><span class="skel"></span></div>
+      </div>
+    `).join('');
   }
+
+  function engineIcon(id) {
+    const map = {
+      claude:     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/></svg>',
+      chatgpt:    '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="20" r="2"/><circle cx="4" cy="12" r="2"/><circle cx="20" cy="12" r="2"/></svg>',
+      gemini:     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L20 12 L12 22 L4 12 Z"/></svg>',
+      perplexity: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2v20M2 12h20M5 5l14 14M5 19L19 5"/></svg>',
+    };
+    return map[id] || '';
+  }
+
+  function setStatus(state, text) {
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    dot.className = 'status-dot' + (state ? ' ' + state : '');
+    txt.textContent = text;
+  }
+
+  function setRowRunning(llm) {
+    const v = document.getElementById('v-' + llm);
+    const q = document.getElementById('q-' + llm);
+    const b = document.getElementById('b-' + llm);
+    if (!v) return;
+    v.classList.add('row-pending');
+    v.textContent = 'Querying engine…';
+    q.classList.add('row-pending');
+    q.innerHTML = '<span class="skel"></span>';
+    b.className = 'pill pending';
+    b.textContent = 'Running';
+  }
+
+  function setRowResult(llm, r) {
+    const v = document.getElementById('v-' + llm);
+    const q = document.getElementById('q-' + llm);
+    const b = document.getElementById('b-' + llm);
+    if (!v) return;
+
+    v.classList.remove('row-pending');
+    v.textContent = r.verdict || '—';
+
+    q.classList.remove('row-pending');
+    if (r.quote && r.quote.trim()) {
+      q.textContent = '"' + r.quote.trim() + '"';
+    } else if (r.error) {
+      q.textContent = r.error;
+    } else {
+      q.textContent = '—';
+    }
+
+    b.className = 'pill ' + (r.status || 'invisible');
+    b.textContent = r.label || '—';
+  }
+
+  function animateScore(target) {
+    const scoreNum = document.getElementById('scoreNum');
+    let s = 0;
+    const step = Math.max(1, Math.round(target / 30));
+    const tick = setInterval(() => {
+      s = Math.min(target, s + step);
+      scoreNum.innerHTML = s + '<small>/100</small>';
+      if (s >= target) clearInterval(tick);
+    }, 30);
+  }
+
+  function recommendationFor(score) {
+    if (score <= 30) return 'Establish baseline citations on high-authority publications and review platforms before competitors widen the gap.';
+    if (score <= 50) return 'Tighten the descriptive language sources use about you — listicle outreach and review-language coaching first.';
+    if (score <= 70) return 'You\'re visible but undifferentiated. Build a signature association so engines have something distinctive to say.';
+    if (score <= 85) return 'Defend the position. Monitor competitor citation share and lock in schema + llms.txt deployment.';
+    return 'Maintain dominance. Quarterly audits and competitor alerts to detect erosion early.';
+  }
+
+  let currentSource = null;
 
   async function runAudit() {
     const name = document.getElementById('bizName').value.trim();
@@ -1070,51 +1361,79 @@
     if (!name || !query) return;
 
     const btn = document.getElementById('runBtn');
-    const status = document.getElementById('status');
     btn.disabled = true;
-    btn.textContent = 'Running…';
-    status.innerHTML = '<span class="dots">Auditing</span>';
+    btn.innerHTML = 'Running… <span></span>';
 
-    resetMatrix();
+    document.getElementById('targetLabel').textContent = '— ' + name;
+    document.getElementById('scoreCard').classList.add('hidden');
+    setStatus('live', 'Auditing all four engines');
 
-    const key = name.toLowerCase();
-    const data = auditData[key] || auditData.default;
+    renderRows();
 
-    // Animate each LLM result with a delay
-    for (let i = 0; i < llms.length; i++) {
-      await new Promise(r => setTimeout(r, 700));
-      const llm = llms[i];
-      const result = data[llm];
-      const verdictEl = document.getElementById('v-' + llm);
-      const badgeEl = document.getElementById('b-' + llm);
+    if (currentSource) { try { currentSource.close(); } catch {} currentSource = null; }
 
-      verdictEl.className = 'verdict';
-      verdictEl.innerHTML = result.verdict + '<span class="verdict-quote">' + result.quote + '</span>';
-      badgeEl.className = 'badge ' + result.status;
-      badgeEl.textContent = result.label;
-    }
+    const url = '/api/audit/stream?business_name=' + encodeURIComponent(name)
+      + '&query=' + encodeURIComponent(query);
+    const es = new EventSource(url);
+    currentSource = es;
 
-    // Show score
-    await new Promise(r => setTimeout(r, 600));
-    const scoreBlock = document.getElementById('scoreBlock');
-    const scoreNum = document.getElementById('scoreNum');
-    const scoreHeadline = document.getElementById('scoreHeadline');
-    scoreBlock.classList.remove('hidden');
-    scoreHeadline.innerHTML = data.headline;
+    es.addEventListener('progress', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.status === 'running') setRowRunning(data.llm);
+      } catch {}
+    });
 
-    // Animate the score number
-    let s = 0;
-    const target = data.score;
-    const tick = setInterval(() => {
-      s += 2;
-      if (s >= target) { s = target; clearInterval(tick); }
-      scoreNum.innerHTML = s + '<small>/100</small>';
-    }, 28);
+    es.addEventListener('result', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        setRowResult(data.llm, data);
+      } catch {}
+    });
 
-    btn.disabled = false;
-    btn.textContent = 'Run Again';
-    status.innerHTML = 'Audit complete';
+    es.addEventListener('complete', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        const card = document.getElementById('scoreCard');
+        card.classList.remove('hidden');
+        document.getElementById('scoreHeadline').innerHTML = data.headline || '—';
+        document.getElementById('scoreRecBody').textContent = recommendationFor(data.score || 0);
+        animateScore(data.score || 0);
+        setStatus('done', data.cached ? 'Audit complete (cached)' : 'Audit complete');
+      } catch {}
+      es.close();
+      currentSource = null;
+      btn.disabled = false;
+      btn.innerHTML = 'Run Again <span>→</span>';
+    });
+
+    es.addEventListener('error', (e) => {
+      let msg = 'Connection error';
+      try {
+        if (e.data) {
+          const data = JSON.parse(e.data);
+          msg = data.message || msg;
+        }
+      } catch {}
+      setStatus('', msg);
+      es.close();
+      currentSource = null;
+      btn.disabled = false;
+      btn.innerHTML = 'Try Again <span>→</span>';
+    });
   }
+
+  // Pricing toggle
+  function togglePricing() {
+    const sw = document.getElementById('pricingToggle');
+    const on = sw.classList.toggle('on');
+    document.querySelectorAll('.tier-price [data-monthly]').forEach(el => {
+      el.textContent = on ? el.dataset.annual : el.dataset.monthly;
+    });
+  }
+
+  // Initial render
+  renderRows();
 </script>
 
 </body>
